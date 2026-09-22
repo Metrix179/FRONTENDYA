@@ -1,0 +1,11 @@
+{
+  "name": "PoshanEye",
+  "short_name": "PoshanEye",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0F3827",
+  "theme_color": "#0F3827",
+  "description": "PoshanEye - Child Nutrition & Growth Monitoring",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}

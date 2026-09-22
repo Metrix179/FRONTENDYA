@@ -1,0 +1,448 @@
+import 'package:flutter/material.dart';
+
+class NutritionPlanScreen extends StatefulWidget {
+  final String childName;
+
+  const NutritionPlanScreen({
+    Key? key,
+    this.childName = 'Aarav',
+  }) : super(key: key);
+
+  @override
+  State<NutritionPlanScreen> createState() => _NutritionPlanScreenState();
+}
+
+class _MealData {
+  final String id;
+  final String category;
+  final String time;
+  final IconData icon;
+  int currentOptionIndex;
+  bool isExpanded;
+  bool isSwapping;
+  final List<Map<String, String>> options;
+
+  _MealData({
+    required this.id,
+    required this.category,
+    required this.time,
+    required this.icon,
+    this.currentOptionIndex = 0,
+    this.isExpanded = false,
+    this.isSwapping = false,
+    required this.options,
+  });
+}
+
+class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
+  bool _isDarkMode = false;
+
+  late final List<_MealData> _meals = [
+    _MealData(
+      id: 'breakfast',
+      category: 'Breakfast',
+      time: '8:00 AM',
+      icon: Icons.coffee,
+      options: [
+        {
+          'title': 'Oatmeal with mashed bananas & almond dust',
+          'nutrition': 'Nutritional value: Approx. 220 kcal · 7 g protein · 5 g fiber',
+        },
+        {
+          'title': 'Warm ragi porridge with grated apples & almonds',
+          'nutrition': 'Nutritional value: Approx. 220 kcal · 7 g protein · 5 g fiber',
+        },
+        {
+          'title': 'Steamed idli with mild vegetable sambar & coconut drizzle',
+          'nutrition': 'Nutritional value: Approx. 205 kcal · 6.5 g protein · 4.5 g fiber',
+        },
+      ],
+    ),
+    _MealData(
+      id: 'lunch',
+      category: 'Lunch',
+      time: '12:30 PM',
+      icon: Icons.restaurant,
+      options: [
+        {
+          'title': 'Soft lentil soup (Dal) with mashed rice & ghee',
+          'nutrition': 'Nutritional value: Approx. 340 kcal · 11 g protein · 6 g fiber',
+        },
+        {
+          'title': 'Mashed khichdi with ghee and steamed carrots',
+          'nutrition': 'Nutritional value: Approx. 315 kcal · 10.5 g protein · 6.5 g fiber',
+        },
+        {
+          'title': 'Curd rice with steamed beetroot & tempered cumin',
+          'nutrition': 'Nutritional value: Approx. 290 kcal · 9.2 g protein · 4.8 g fiber',
+        },
+      ],
+    ),
+    _MealData(
+      id: 'snack',
+      category: 'Afternoon Snack',
+      time: '3:30 PM',
+      icon: Icons.apple,
+      options: [
+        {
+          'title': 'Thinly sliced apples or pureed fruit with curd',
+          'nutrition': 'Nutritional value: Approx. 135 kcal · 3.5 g protein · 4.2 g fiber',
+        },
+        {
+          'title': 'Roasted makhana with mashed banana puree',
+          'nutrition': 'Nutritional value: Approx. 145 kcal · 4 g protein · 3.8 g fiber',
+        },
+      ],
+    ),
+    _MealData(
+      id: 'dinner',
+      category: 'Dinner',
+      time: '7:00 PM',
+      icon: Icons.nightlight_round,
+      options: [
+        {
+          'title': 'Steamed vegetables and pumpkin porridge',
+          'nutrition': 'Nutritional value: Approx. 235 kcal · 5.5 g protein · 6.2 g fiber',
+        },
+        {
+          'title': 'Soft moong dal cheela with mild mint dip',
+          'nutrition': 'Nutritional value: Approx. 250 kcal · 9 g protein · 5.5 g fiber',
+        },
+      ],
+    ),
+  ];
+
+  void _swapMeal(_MealData meal) async {
+    if (meal.isSwapping) return;
+    setState(() => meal.isSwapping = true);
+
+    await Future.delayed(const Duration(milliseconds: 750));
+    if (!mounted) return;
+
+    setState(() {
+      meal.currentOptionIndex = (meal.currentOptionIndex + 1) % meal.options.length;
+      meal.isSwapping = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFEEF3ED),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildTopBar(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 90),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTitle(),
+                    const SizedBox(height: 10),
+                    _buildTimelineList(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: Color(0xFF0C2417)),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              const Icon(Icons.remove_red_eye_outlined, color: Color(0xFF0C2417), size: 22),
+              const SizedBox(width: 6),
+              const Text(
+                'Nutrition Plan',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0C2417),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => setState(() => _isDarkMode = !_isDarkMode),
+                child: Container(
+                  width: 54,
+                  height: 28,
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDFE8DF),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFCEDECE)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: _isDarkMode
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: _isDarkMode
+                              ? const Color(0xFF0F3827)
+                              : const Color(0xFF2AE196),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _isDarkMode ? Icons.nightlight_round : Icons.wb_sunny,
+                          size: 13,
+                          color: _isDarkMode ? Colors.white : const Color(0xFF0C2417),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const CircleAvatar(
+                radius: 16,
+                backgroundColor: Color(0xFF0C2417),
+                child: Icon(Icons.person_outline, size: 16, color: Colors.white),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTitle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "${widget.childName}'s Nutrition Plan",
+            style: const TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF0C2417),
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 3),
+          const Text(
+            'Nourishing meal guide tailored for today.',
+            style: TextStyle(
+              fontSize: 13.5,
+              color: Color(0xFF556D5E),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineList() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Stack(
+        children: [
+          // Vertical Line
+          Positioned(
+            left: 17,
+            top: 24,
+            bottom: 30,
+            child: Container(
+              width: 3,
+              decoration: BoxDecoration(
+                color: const Color(0xFF65E042),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Column(
+            children: _meals.map((meal) => _buildMealCard(meal)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealCard(_MealData meal) {
+    final currentOption = meal.options[meal.currentOptionIndex];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Timeline Node
+          Container(
+            width: 36,
+            height: 36,
+            margin: const EdgeInsets.only(top: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3ECE3),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFB5DAB5), width: 2),
+            ),
+            child: Icon(meal.icon, size: 16, color: const Color(0xFF2D613D)),
+          ),
+          const SizedBox(width: 12),
+
+          // Card
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE2EAE2)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Row category & time
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        meal.category,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF0C2417),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F6F1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2EAE2)),
+                        ),
+                        child: Text(
+                          meal.time,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF556D5E),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Option title
+                  Text(
+                    currentOption['title']!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2C3F33),
+                      height: 1.35,
+                    ),
+                  ),
+
+                  // Expanded info
+                  if (meal.isExpanded) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFBFDFB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFEDF3ED)),
+                      ),
+                      child: Text(
+                        currentOption['nutrition']!,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          color: Color(0xFF556D5E),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 12),
+                  // Actions: Read More & Swap Option
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => setState(() => meal.isExpanded = !meal.isExpanded),
+                        child: Row(
+                          children: [
+                            Text(
+                              meal.isExpanded ? 'Read less' : 'Read more',
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0C2417),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              meal.isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                              size: 16,
+                              color: const Color(0xFF0C2417),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _swapMeal(meal),
+                        child: Row(
+                          children: [
+                            meal.isSwapping
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF059669)),
+                                  )
+                                : const Icon(Icons.sync, size: 16, color: Color(0xFF0C2417)),
+                            const SizedBox(width: 6),
+                            Text(
+                              meal.isSwapping ? 'Swapping...' : 'Swap Option',
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0C2417),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
