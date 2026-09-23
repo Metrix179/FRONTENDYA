@@ -108,8 +108,90 @@ class AppTheme {
       ),
       colorScheme: const ColorScheme.light(
         primary: AppColors.primaryForest,
+        onPrimary: Colors.white,
+        secondary: AppColors.neonGreen,
+        onSecondary: AppColors.textDark,
         surface: AppColors.background,
         onSurface: AppColors.textDark,
+        error: Color(0xFFB42318),
+        onError: Colors.white,
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _FluidPageTransitionsBuilder(),
+          TargetPlatform.iOS: _FluidPageTransitionsBuilder(),
+          TargetPlatform.windows: _FluidPageTransitionsBuilder(),
+          TargetPlatform.macOS: _FluidPageTransitionsBuilder(),
+          TargetPlatform.linux: _FluidPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: _FluidPageTransitionsBuilder(),
+        },
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.cardSurfaceLight,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+          side: const BorderSide(color: AppColors.cardBorder),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.inputBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.inputBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.primaryForest, width: 1.5),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryForest,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          minimumSize: const Size.fromHeight(50),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: AppColors.primaryForest,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+  }
+}
+
+class _FluidPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FluidPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeInOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0.04, 0), end: Offset.zero).animate(curved),
+        child: child,
       ),
     );
   }

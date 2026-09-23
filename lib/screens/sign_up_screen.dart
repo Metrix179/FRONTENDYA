@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/topo_header.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/auth_tabs.dart';
 import 'auth_choice_screen.dart';
-import 'sign_in_screen.dart';
-import 'home_dashboard_screen.dart';
+import '../state/session_provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   final UserRole role;
@@ -227,13 +228,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 isSignIn: false,
                 onTabChanged: (isSignIn) {
                   if (isSignIn) {
-                    Navigator.of(context).pushReplacement(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SignInScreen(role: widget.role),
-                        transitionDuration: Duration.zero,
-                      ),
-                    );
+                    context.go('/sign-in/${widget.role.name}');
                   }
                 },
               ),
@@ -248,12 +243,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     final enteredName = _nameController.text.trim();
                     final fallback = widget.role == UserRole.parent ? 'Aarav' : 'Dr. Priya';
                     final childName = enteredName.isNotEmpty ? enteredName : fallback;
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => HomeDashboardScreen(childName: childName),
-                      ),
-                      (route) => false,
-                    );
+                    ProviderScope.containerOf(context, listen: false)
+                        .read(sessionProvider.notifier)
+                        .signInAs(childName);
+                    context.go('/app', extra: childName);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryForest,

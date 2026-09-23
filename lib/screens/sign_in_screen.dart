@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/topo_header.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/auth_tabs.dart';
 import 'auth_choice_screen.dart';
-import 'sign_up_screen.dart';
-import 'main_scaffold.dart';
+import '../state/session_provider.dart';
 
 class SignInScreen extends StatefulWidget {
   final UserRole role;
@@ -17,6 +18,9 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  static const _demoParentChildId = 'PE-1048';
+  static const _demoParentPassword = '12345678';
+
   final _idController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -25,6 +29,35 @@ class _SignInScreenState extends State<SignInScreen> {
     _idController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _signIn() {
+    final enteredId = _idController.text.trim().toUpperCase();
+    final enteredPassword = _passwordController.text;
+
+    if (enteredId.isEmpty || enteredPassword.isEmpty) {
+      _showError('Enter your child ID and password to continue.');
+      return;
+    }
+
+    if (widget.role == UserRole.parent &&
+        (enteredId != _demoParentChildId ||
+            enteredPassword != _demoParentPassword)) {
+      _showError('Incorrect child ID or password.');
+      return;
+    }
+
+    final childName = widget.role == UserRole.parent ? 'Aarav' : 'Dr. Priya';
+    ProviderScope.containerOf(context, listen: false)
+        .read(sessionProvider.notifier)
+        .signInAs(childName);
+    context.go('/app', extra: childName);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -110,13 +143,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 isSignIn: true,
                 onTabChanged: (isSignIn) {
                   if (!isSignIn) {
-                    Navigator.of(context).pushReplacement(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SignUpScreen(role: widget.role),
-                        transitionDuration: Duration.zero,
-                      ),
-                    );
+                    context.go('/sign-up/${widget.role.name}');
                   }
                 },
               ),
@@ -127,15 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    final childName = widget.role == UserRole.parent ? 'Aarav' : 'Dr. Priya';
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => MainScaffold(childName: childName),
-                      ),
-                      (route) => false,
-                    );
-                  },
+                  onPressed: _signIn,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryForest,
                     foregroundColor: Colors.white,

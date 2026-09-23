@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/topo_header.dart';
 import '../widgets/role_card.dart';
-import 'auth_choice_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -21,7 +22,15 @@ class RoleSelectionScreen extends StatelessWidget {
                 title: 'Welcome',
                 subtitle:
                     'Continue with the role that matches your journey and keep every child milestone in view.',
-              ),
+              ).animate().fadeIn(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOutCubic,
+                  ).slideY(
+                    begin: 0.08,
+                    end: 0,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOutCubic,
+                  ),
               const SizedBox(height: 32),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
@@ -41,60 +50,34 @@ class RoleSelectionScreen extends StatelessWidget {
                 description: "Manage your child's growth and nutrition",
                 icon: Icons.person_outline_rounded,
                 onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          const AuthChoiceScreen(role: UserRole.parent),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.15, 0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          ),
-                        );
-                      },
-                    ),
-                  );
+                  context.push('/auth/parent');
                 },
-              ),
+              ).animate(delay: const Duration(milliseconds: 100)).fadeIn(
+                    duration: const Duration(milliseconds: 450),
+                    curve: Curves.easeOutCubic,
+                  ).slideX(
+                    begin: 0.08,
+                    end: 0,
+                    duration: const Duration(milliseconds: 450),
+                    curve: Curves.easeOutCubic,
+                  ),
               const SizedBox(height: 16),
               RoleCard(
                 title: 'Healthcare Worker',
                 description: 'Monitor and manage child health records',
                 icon: Icons.medical_services_outlined,
                 onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          const AuthChoiceScreen(role: UserRole.healthcare),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.15, 0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          ),
-                        );
-                      },
-                    ),
-                  );
+                  context.push('/auth/healthcare');
                 },
-              ),
+              ).animate(delay: const Duration(milliseconds: 180)).fadeIn(
+                    duration: const Duration(milliseconds: 450),
+                    curve: Curves.easeOutCubic,
+                  ).slideX(
+                    begin: 0.08,
+                    end: 0,
+                    duration: const Duration(milliseconds: 450),
+                    curve: Curves.easeOutCubic,
+                  ),
               const SizedBox(height: 24),
             ],
           ),

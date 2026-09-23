@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/topo_header.dart';
 import '../widgets/auth_option_card.dart';
-import 'sign_in_screen.dart';
-import 'sign_up_screen.dart';
 
 enum UserRole { parent, healthcare }
 
@@ -70,10 +69,13 @@ class AuthChoiceScreen extends StatelessWidget {
                     ),
                   ),
                   child: Center(
-                    child: Icon(
-                      roleIcon,
-                      color: Colors.white,
-                      size: 24,
+                    child: Hero(
+                      tag: 'role-icon-${isParent ? 'Parent' : 'Healthcare Worker'}',
+                      child: Icon(
+                        roleIcon,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
@@ -87,28 +89,7 @@ class AuthChoiceScreen extends StatelessWidget {
                 description: 'Existing account login',
                 isPrimary: true,
                 onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          SignInScreen(role: role),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.15, 0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          ),
-                        );
-                      },
-                    ),
-                  );
+                  context.push('/sign-in/${role.name}');
                 },
               ),
               const SizedBox(height: 16),
@@ -120,28 +101,7 @@ class AuthChoiceScreen extends StatelessWidget {
                 description: 'Register new account',
                 isPrimary: false,
                 onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          SignUpScreen(role: role),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.15, 0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          ),
-                        );
-                      },
-                    ),
-                  );
+                  context.push('/sign-up/${role.name}');
                 },
               ),
               const SizedBox(height: 24),

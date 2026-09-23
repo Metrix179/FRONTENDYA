@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 import '../theme/app_colors.dart';
 
 class AiScanScreen extends StatefulWidget {
@@ -29,6 +30,10 @@ class _AiScanScreenState extends State<AiScanScreen>
 
   late AnimationController _counterController;
   late Animation<double> _counterAnimation;
+
+  CameraController? _cameraController;
+  String? _cameraError;
+  bool _isCameraReady = false;
 
   final List<Map<String, dynamic>> _mascots = [
     {'name': 'Albatross', 'subtitle': 'Graceful Ocean Soarer', 'emoji': '🪶'},
@@ -64,10 +69,69 @@ class _AiScanScreenState extends State<AiScanScreen>
       parent: _counterController,
       curve: Curves.easeOutCubic,
     );
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        throw CameraException('NoCamera', 'No camera was found on this device.');
+      }
+
+      final preferredCamera = cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.front,
+        orElse: () => cameras.first,
+      );
+      final controller = CameraController(
+        preferredCamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+      await controller.initialize();
+
+      if (!mounted) {
+        await controller.dispose();
+        return;
+      }
+      setState(() {
+        _cameraController = controller;
+        _isCameraReady = true;
+        _cameraError = null;
+      });
+    } on CameraException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _cameraError = _cameraErrorMessage(error);
+        _isCameraReady = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _cameraError = 'Camera access is unavailable. Check browser permissions.';
+        _isCameraReady = false;
+      });
+    }
+  }
+
+  String _cameraErrorMessage(CameraException error) {
+    switch (error.code) {
+      case 'CameraAccessDenied':
+      case 'CameraAccessDeniedWithoutPrompt':
+        return 'Camera permission was denied. Allow camera access to use AI Scan.';
+      case 'CameraAccessRestricted':
+        return 'Camera access is restricted on this device.';
+      case 'CameraNotFound':
+      case 'NoCamera':
+        return 'No camera was found on this device.';
+      default:
+        return error.description ?? 'Camera access is unavailable.';
+    }
   }
 
   @override
   void dispose() {
+    _cameraController?.dispose();
     _laserController.dispose();
     _spinController.dispose();
     _counterController.dispose();
@@ -205,6 +269,57 @@ class _AiScanScreenState extends State<AiScanScreen>
             ),
             child: Stack(
               children: [
+                // Live camera preview starts as soon as the scan page opens.
+                if (_isCameraReady && _cameraController != null)
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: _cameraController!.value.previewSize!.height,
+                          height: _cameraController!.value.previewSize!.width,
+                          child: CameraPreview(_cameraController!),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                if (!_isCameraReady)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAF8).withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.videocam_outlined, size: 34, color: Color(0xFF0F3827)),
+                              const SizedBox(height: 10),
+                              Text(
+                                _cameraError ?? 'Starting camera...',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF445B4E)),
+                              ),
+                              if (_cameraError != null) ...[
+                                const SizedBox(height: 12),
+                                TextButton.icon(
+                                  onPressed: _initializeCamera,
+                                  icon: const Icon(Icons.refresh, size: 16),
+                                  label: const Text('Try again'),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                 // Corner Brackets
                 Positioned.fill(
                   child: CustomPaint(

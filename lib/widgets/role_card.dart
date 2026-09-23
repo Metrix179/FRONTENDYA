@@ -48,10 +48,13 @@ class RoleCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 24,
+                  child: Hero(
+                    tag: 'role-icon-$title',
+                    child: Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                 ),
               ),

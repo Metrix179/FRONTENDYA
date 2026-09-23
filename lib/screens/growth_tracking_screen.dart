@@ -113,10 +113,50 @@ class _GrowthTrackingBodyState extends State<GrowthTrackingScreenBody>
   }
 }
 
+class GrowthVitalsCalculatorScreen extends StatefulWidget {
+  final String childName;
+  final void Function(double weight, double height)? onSaved;
+
+  const GrowthVitalsCalculatorScreen({
+    Key? key,
+    this.childName = 'Aarav',
+    this.onSaved,
+  }) : super(key: key);
+
+  @override
+  State<GrowthVitalsCalculatorScreen> createState() =>
+      _GrowthVitalsCalculatorScreenState();
+}
+
+class _GrowthVitalsCalculatorScreenState
+    extends State<GrowthVitalsCalculatorScreen>
+    with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
+  @override
+  String get childName => widget.childName;
+
+  @override
+  void Function(double weight, double height)? get onCalculatorSaved =>
+      widget.onSaved;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFEAF1E9),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: _buildCalculatorView(),
+        ),
+      ),
+    );
+  }
+}
+
 // Shared mixin holding all state and build methods for Growth Tracking.
 mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerProviderStateMixin<T> {
   // Subclass must provide childName
   String get childName;
+  void Function(double weight, double height)? get onCalculatorSaved => null;
 
   int _selectedSegment = 0; // 0: Trends, 1: Calculator
   int _selectedMetric = 0; // 0: Weight, 1: Height, 2: MUAC
@@ -705,7 +745,25 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
             ),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => GrowthVitalsCalculatorScreen(
+                      childName: childName,
+                      onSaved: (weight, height) {
+                        setState(() {
+                          _currentWeight = weight;
+                          _currentHeight = height;
+                          _weightMilestones[4]['child'] = weight;
+                          _heightMilestones[4]['child'] = height;
+                          _selectedMilestoneIndex = null;
+                          _counterController.forward(from: 0.0);
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.forestGreen,
                 foregroundColor: Colors.white,
@@ -969,23 +1027,12 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _MeasurementRulerWidget(
+                  _WeightPickerWidget(
                     value: _calcWeight,
                     minValue: 2.0,
                     maxValue: 80.0,
-                    majorStep: 5.0,
-                    minorStep: 1.0,
                     isValid: isWeightValid,
                     onChanged: (val) => setState(() => _calcWeight = val),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('2 kg', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF667D6F), letterSpacing: 0.4)),
-                      Text('← Drag to adjust →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF99B0A5))),
-                      Text('80 kg', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF667D6F), letterSpacing: 0.4)),
-                    ],
                   ),
                   if (!isWeightValid)
                     const Padding(
@@ -1035,23 +1082,12 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _MeasurementRulerWidget(
+                  _HeightPickerWidget(
                     value: _calcHeight,
                     minValue: 45.0,
                     maxValue: 190.0,
-                    majorStep: 10.0,
-                    minorStep: 2.0,
                     isValid: isHeightValid,
                     onChanged: (val) => setState(() => _calcHeight = val),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('45 cm', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF667D6F), letterSpacing: 0.4)),
-                      Text('← Drag to adjust →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF99B0A5))),
-                      Text('190 cm', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF667D6F), letterSpacing: 0.4)),
-                    ],
                   ),
                   if (!isHeightValid)
                     const Padding(
@@ -1147,14 +1183,20 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                 setState(() => _calcStep = 5);
               } else {
                 // Save to profile and switch back to Trends with animated numbers
-                setState(() {
-                  _currentWeight = _calcWeight;
-                  _currentHeight = _calcHeight;
-                  _weightMilestones[4]['child'] = _calcWeight;
-                  _heightMilestones[4]['child'] = _calcHeight;
-                  _selectedSegment = 0;
-                  _counterController.forward(from: 0.0);
-                });
+                final savedCallback = onCalculatorSaved;
+                if (savedCallback != null) {
+                  savedCallback(_calcWeight, _calcHeight);
+                  Navigator.of(context).pop();
+                } else {
+                  setState(() {
+                    _currentWeight = _calcWeight;
+                    _currentHeight = _calcHeight;
+                    _weightMilestones[4]['child'] = _calcWeight;
+                    _heightMilestones[4]['child'] = _calcHeight;
+                    _selectedSegment = 0;
+                    _counterController.forward(from: 0.0);
+                  });
+                }
               }
             },
             style: ElevatedButton.styleFrom(
@@ -1246,6 +1288,415 @@ class _GrowthCurvePainter extends CustomPainter {
 // ─────────────────────────────────────────────────────────────────────────────
 // Measurement Ruler Widget (Weight & Height input scale)
 // ─────────────────────────────────────────────────────────────────────────────
+
+class _WeightPickerWidget extends StatefulWidget {
+  final double value;
+  final double minValue;
+  final double maxValue;
+  final bool isValid;
+  final ValueChanged<double> onChanged;
+
+  const _WeightPickerWidget({
+    Key? key,
+    required this.value,
+    required this.minValue,
+    required this.maxValue,
+    required this.isValid,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  State<_WeightPickerWidget> createState() => _WeightPickerWidgetState();
+}
+
+class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
+  static const double _pixelsPerKg = 7.0;
+  static const double _kgPerLb = 0.45359237;
+  bool _showPounds = false;
+
+  double get _displayValue => _showPounds ? widget.value / _kgPerLb : widget.value;
+
+  double _snapKg(double value) {
+    final clamped = value.clamp(widget.minValue, widget.maxValue);
+    return double.parse(clamped.toStringAsFixed(1));
+  }
+
+  void _changeByPixels(double delta) {
+    widget.onChanged(_snapKg(widget.value + delta / _pixelsPerKg));
+  }
+
+  void _setFromPosition(double localX, double width) {
+    final ratio = (localX / width).clamp(0.0, 1.0);
+    final next = widget.minValue + ratio * (widget.maxValue - widget.minValue);
+    widget.onChanged(_snapKg(next));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
+    final track = widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
+    final ratio = ((widget.value - widget.minValue) / (widget.maxValue - widget.minValue)).clamp(0.0, 1.0);
+
+    return Container(
+      height: 220,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FBF8),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: track),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'WEIGHT SCALE',
+                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 1),
+              ),
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(color: const Color(0xFFE3ECE4), borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  children: [
+                    _unitButton('KG', !_showPounds, () => setState(() => _showPounds = false)),
+                    _unitButton('LB', _showPounds, () => setState(() => _showPounds = true)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${_showPounds ? _displayValue.round() : _displayValue.toStringAsFixed(1)} ${_showPounds ? 'lb' : 'kg'}',
+            style: TextStyle(fontSize: 42, height: 1.05, fontWeight: FontWeight.w900, color: accent, fontFamily: 'monospace'),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final rulerWidth = constraints.maxWidth;
+                final thumbLeft = ratio * (rulerWidth - 20);
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragUpdate: (details) => _changeByPixels(details.primaryDelta ?? 0),
+                  onTapDown: (details) => _setFromPosition(details.localPosition.dx, rulerWidth),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: _WeightPickerPainter(
+                            value: widget.value,
+                            minValue: widget.minValue,
+                            maxValue: widget.maxValue,
+                            accent: accent,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: rulerWidth / 2 - 1.5,
+                        top: 0,
+                        bottom: 26,
+                        child: IgnorePointer(child: Container(width: 3, decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(2)))),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 8,
+                        child: Container(height: 2, color: track),
+                      ),
+                      Positioned(
+                        left: thumbLeft,
+                        bottom: -1,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onHorizontalDragUpdate: (details) {
+                            final nextRatio = ((thumbLeft + details.delta.dx) / (rulerWidth - 20)).clamp(0.0, 1.0);
+                            widget.onChanged(_snapKg(widget.minValue + nextRatio * (widget.maxValue - widget.minValue)));
+                          },
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: accent, width: 2.5),
+                              boxShadow: [BoxShadow(color: accent.withOpacity(0.25), blurRadius: 8)],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          Text('Drag the scale or thumb to adjust', style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
+        ],
+      ),
+    );
+  }
+
+  Widget _unitButton(String label, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(color: selected ? const Color(0xFF0F3827) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
+        child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: selected ? Colors.white : const Color(0xFF667D6F))),
+      ),
+    );
+  }
+}
+
+class _WeightPickerPainter extends CustomPainter {
+  final double value;
+  final double minValue;
+  final double maxValue;
+  final Color accent;
+
+  _WeightPickerPainter({required this.value, required this.minValue, required this.maxValue, required this.accent});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final range = maxValue - minValue;
+    final pixelsPerUnit = size.width / range;
+    final minorPaint = Paint()..color = const Color(0xFFB3C4B6)..strokeWidth = 1.5;
+    final majorPaint = Paint()..color = const Color(0xFF6F8978)..strokeWidth = 2;
+
+    for (int weight = minValue.toInt(); weight <= maxValue.toInt(); weight++) {
+      final x = (weight - minValue) * pixelsPerUnit;
+      final isMajor = weight % 10 == 0;
+      final isMedium = weight % 5 == 0;
+      final tickHeight = isMajor ? 30.0 : (isMedium ? 22.0 : 13.0);
+      canvas.drawLine(Offset(x, size.height - 28), Offset(x, size.height - 28 - tickHeight), isMajor ? majorPaint : minorPaint);
+      if (isMajor) {
+        final textPainter = TextPainter(
+          text: TextSpan(text: '$weight', style: const TextStyle(fontSize: 11, color: Color(0xFF6F8978), fontWeight: FontWeight.w700)),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        textPainter.paint(canvas, Offset(x - textPainter.width / 2, size.height - 22));
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeightPickerPainter oldDelegate) =>
+      oldDelegate.value != value || oldDelegate.accent != accent;
+}
+
+class _HeightPickerWidget extends StatefulWidget {
+  final double value;
+  final double minValue;
+  final double maxValue;
+  final bool isValid;
+  final ValueChanged<double> onChanged;
+
+  const _HeightPickerWidget({
+    Key? key,
+    required this.value,
+    required this.minValue,
+    required this.maxValue,
+    required this.isValid,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  State<_HeightPickerWidget> createState() => _HeightPickerWidgetState();
+}
+
+class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
+  static const double _pixelsPerCm = 5.0;
+  bool _showInches = false;
+
+  double get _displayValue => _showInches ? widget.value / 2.54 : widget.value;
+
+  double _snap(double value) {
+    final clamped = value.clamp(widget.minValue, widget.maxValue);
+    return double.parse(clamped.round().toStringAsFixed(0));
+  }
+
+  void _changeByPixels(double delta) {
+    final next = _snap(widget.value - delta / _pixelsPerCm);
+    widget.onChanged(next);
+  }
+
+  void _setFromPosition(double localY, double height) {
+    final ratio = (localY / height).clamp(0.0, 1.0);
+    final next = widget.maxValue - ratio * (widget.maxValue - widget.minValue);
+    widget.onChanged(_snap(next));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
+    final track = widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
+    final range = widget.maxValue - widget.minValue;
+    final thumbPosition = ((widget.maxValue - widget.value) / range).clamp(0.0, 1.0);
+
+    return Container(
+      height: 300,
+      padding: const EdgeInsets.fromLTRB(14, 14, 8, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FBF8),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: track),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'HEIGHT SCALE',
+                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 1),
+              ),
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(color: const Color(0xFFE3ECE4), borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  children: [
+                    _unitButton('CM', !_showInches, () => setState(() => _showInches = false)),
+                    _unitButton('IN', _showInches, () => setState(() => _showInches = true)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final rulerHeight = constraints.maxHeight;
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (details) => _changeByPixels(details.primaryDelta ?? 0),
+                  onTapDown: (details) => _setFromPosition(details.localPosition.dy, rulerHeight),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        right: 42,
+                        child: CustomPaint(
+                          painter: _HeightPickerPainter(
+                            value: widget.value,
+                            minValue: widget.minValue,
+                            maxValue: widget.maxValue,
+                            accent: accent,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 40,
+                        top: rulerHeight * 0.42,
+                        child: IgnorePointer(
+                          child: Container(height: 2, color: accent),
+                        ),
+                      ),
+                      Positioned(
+                        right: 10,
+                        top: 0,
+                        bottom: 0,
+                        child: Container(width: 3, decoration: BoxDecoration(color: track, borderRadius: BorderRadius.circular(3))),
+                      ),
+                      Positioned(
+                        right: 1,
+                        top: (rulerHeight - 20) * thumbPosition,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onVerticalDragUpdate: (details) => _changeByPixels(details.primaryDelta ?? 0),
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: accent, width: 2.5),
+                              boxShadow: [BoxShadow(color: accent.withOpacity(0.25), blurRadius: 8)],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 48,
+                        top: rulerHeight * 0.42 - 15,
+                        child: IgnorePointer(
+                          child: Text(
+                            '${_displayValue.round()} ${_showInches ? 'in' : 'cm'}',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: accent),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text('Drag the thumb or scale to adjust', style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
+        ],
+      ),
+    );
+  }
+
+  Widget _unitButton(String label, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF0F3827) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: selected ? Colors.white : const Color(0xFF667D6F))),
+      ),
+    );
+  }
+}
+
+class _HeightPickerPainter extends CustomPainter {
+  final double value;
+  final double minValue;
+  final double maxValue;
+  final Color accent;
+
+  _HeightPickerPainter({required this.value, required this.minValue, required this.maxValue, required this.accent});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tickPaint = Paint()..color = const Color(0xFFB3C4B6)..strokeWidth = 1.5;
+    final majorPaint = Paint()..color = const Color(0xFF6F8978)..strokeWidth = 2;
+    final range = maxValue - minValue;
+    final pixelsPerUnit = size.height / range;
+
+    for (int height = minValue.toInt(); height <= maxValue.toInt(); height++) {
+      final y = (maxValue - height) * pixelsPerUnit;
+      final isMajor = height % 10 == 0;
+      final isMedium = height % 5 == 0;
+      final length = isMajor ? 34.0 : (isMedium ? 25.0 : 16.0);
+      canvas.drawLine(Offset(size.width - length, y), Offset(size.width, y), isMajor ? majorPaint : tickPaint);
+      if (isMajor) {
+        final textPainter = TextPainter(
+          text: TextSpan(text: '$height', style: const TextStyle(fontSize: 11, color: Color(0xFF6F8978), fontWeight: FontWeight.w700)),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        textPainter.paint(canvas, Offset(size.width - length - textPainter.width - 8, y - textPainter.height / 2));
+      }
+    }
+
+    final selectedY = (maxValue - value) * pixelsPerUnit;
+    final markerPaint = Paint()..color = accent..strokeWidth = 2.5;
+    canvas.drawCircle(Offset(size.width - 3, selectedY), 5, markerPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeightPickerPainter oldDelegate) =>
+      oldDelegate.value != value || oldDelegate.accent != accent;
+}
 
 class _MeasurementRulerWidget extends StatefulWidget {
   final double value;

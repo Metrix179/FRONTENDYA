@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'router/app_router.dart';
 import 'theme/app_theme.dart';
-import 'screens/role_selection_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +12,7 @@ void main() {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
-  runApp(const PoshanEyeApp());
+  runApp(const ProviderScope(child: PoshanEyeApp()));
 }
 
 class PoshanEyeApp extends StatelessWidget {
@@ -19,7 +20,7 @@ class PoshanEyeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'PoshanEye',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
@@ -45,7 +46,7 @@ class PoshanEyeApp extends StatelessWidget {
           ),
         );
       },
-      home: const RoleSelectionScreen(),
+      routerConfig: appRouter,
     );
   }
 }
