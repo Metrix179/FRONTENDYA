@@ -4,11 +4,13 @@ import '../theme/app_colors.dart';
 class ProfileScreen extends StatefulWidget {
   final String childName;
   final VoidCallback? onLogout;
+  final bool initialHistoryView;
 
   const ProfileScreen({
     Key? key,
     this.childName = 'Aarav',
     this.onLogout,
+    this.initialHistoryView = false,
   }) : super(key: key);
 
   @override
@@ -45,6 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _childName = widget.childName;
+    _isHistoryView = widget.initialHistoryView;
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'profile_screen.dart';
 
 /// Standalone screen version of Growth Tracking (pushed via Navigator).
 /// Has its own Scaffold + back navigation, no bottom nav.
@@ -31,14 +32,14 @@ class GrowthTrackingScreenBody extends StatefulWidget {
 
 class _GrowthTrackingScreenState extends State<GrowthTrackingScreen>
     with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
-
   @override
   String get childName => widget.childName;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
+      backgroundColor:
+          _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(bottom: 24),
@@ -74,7 +75,6 @@ class _GrowthTrackingScreenState extends State<GrowthTrackingScreen>
 
 class _GrowthTrackingBodyState extends State<GrowthTrackingScreenBody>
     with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
-
   @override
   String get childName => widget.childName;
 
@@ -153,7 +153,8 @@ class _GrowthVitalsCalculatorScreenState
 }
 
 // Shared mixin holding all state and build methods for Growth Tracking.
-mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerProviderStateMixin<T> {
+mixin _GrowthTrackingMixin<T extends StatefulWidget>
+    on State<T>, SingleTickerProviderStateMixin<T> {
   // Subclass must provide childName
   String get childName;
   void Function(double weight, double height)? get onCalculatorSaved => null;
@@ -282,7 +283,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Align(
-                    alignment: _isDarkMode ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: _isDarkMode
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: Container(
                       width: 20,
                       height: 20,
@@ -291,7 +294,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _isDarkMode ? Icons.nightlight_round : Icons.wb_sunny_rounded,
+                        _isDarkMode
+                            ? Icons.nightlight_round
+                            : Icons.wb_sunny_rounded,
                         size: 12,
                         color: const Color(0xFF0C2417),
                       ),
@@ -308,7 +313,8 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
-                child: const Icon(Icons.person_rounded, color: Colors.white, size: 16),
+                child: const Icon(Icons.person_rounded,
+                    color: Colors.white, size: 16),
               ),
             ],
           ),
@@ -366,7 +372,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: _selectedSegment == 0 ? Colors.white : Colors.transparent,
+                    color: _selectedSegment == 0
+                        ? Colors.white
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
@@ -375,7 +383,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.bold,
-                        color: _selectedSegment == 0 ? const Color(0xFF0C2417) : const Color(0xFF5A7263),
+                        color: _selectedSegment == 0
+                            ? const Color(0xFF0C2417)
+                            : const Color(0xFF5A7263),
                       ),
                     ),
                   ),
@@ -388,7 +398,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: _selectedSegment == 1 ? Colors.white : Colors.transparent,
+                    color: _selectedSegment == 1
+                        ? Colors.white
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
@@ -397,7 +409,41 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.bold,
-                        color: _selectedSegment == 1 ? const Color(0xFF0C2417) : const Color(0xFF5A7263),
+                        color: _selectedSegment == 1
+                            ? const Color(0xFF0C2417)
+                            : const Color(0xFF5A7263),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProfileScreen(
+                        childName: childName,
+                        initialHistoryView: true,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'HISTORY',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF5A7263),
                       ),
                     ),
                   ),
@@ -476,8 +522,10 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
       child: AnimatedBuilder(
         animation: _counterAnimation,
         builder: (context, child) {
-          final w = (3.9 + (14.2 - 3.9) * _counterAnimation.value).toStringAsFixed(1);
-          final h = (25.3 + (92.5 - 25.3) * _counterAnimation.value).toStringAsFixed(1);
+          final w =
+              (3.9 + (14.2 - 3.9) * _counterAnimation.value).toStringAsFixed(1);
+          final h = (25.3 + (92.5 - 25.3) * _counterAnimation.value)
+              .toStringAsFixed(1);
 
           return Row(
             children: [
@@ -500,10 +548,15 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                               color: Color(0xFFE8F5E9),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.scale_rounded, size: 16, color: Color(0xFF0F3827)),
+                            child: const Icon(Icons.scale_rounded,
+                                size: 16, color: Color(0xFF0F3827)),
                           ),
                           const SizedBox(width: 6),
-                          const Text('WEIGHT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF667D6F))),
+                          const Text('WEIGHT',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF667D6F))),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -511,19 +564,30 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Text(w, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'monospace')),
+                          Text(w,
+                              style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'monospace')),
                           const SizedBox(width: 3),
-                          const Text('kg', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          const Text('kg',
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: const Color(0xFFD1FAE5),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text('75TH PERCENTILE', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFF065F46))),
+                        child: const Text('75TH PERCENTILE',
+                            style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF065F46))),
                       ),
                     ],
                   ),
@@ -549,10 +613,15 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                               color: Color(0xFFE8F5E9),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.straighten_rounded, size: 16, color: Color(0xFF0F3827)),
+                            child: const Icon(Icons.straighten_rounded,
+                                size: 16, color: Color(0xFF0F3827)),
                           ),
                           const SizedBox(width: 6),
-                          const Text('HEIGHT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF667D6F))),
+                          const Text('HEIGHT',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF667D6F))),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -560,19 +629,30 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Text(h, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'monospace')),
+                          Text(h,
+                              style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'monospace')),
                           const SizedBox(width: 3),
-                          const Text('cm', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          const Text('cm',
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: const Color(0xFFD1FAE5),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text('WHO NORMAL BAND', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFF065F46))),
+                        child: const Text('WHO NORMAL BAND',
+                            style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF065F46))),
                       ),
                     ],
                   ),
@@ -603,7 +683,8 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                 margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 decoration: BoxDecoration(
-                  color: isSel ? const Color(0xFF0F3827) : const Color(0xFFD8E3D8),
+                  color:
+                      isSel ? const Color(0xFF0F3827) : const Color(0xFFD8E3D8),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -627,7 +708,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
   Widget _buildChartCard() {
     final title = '${_metricTitles[_selectedMetric]} Progress Curve';
     final milestones = _currentMilestones;
-    final activeData = _selectedMilestoneIndex != null ? milestones[_selectedMilestoneIndex!] : null;
+    final activeData = _selectedMilestoneIndex != null
+        ? milestones[_selectedMilestoneIndex!]
+        : null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -641,7 +724,11 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: Color(0xFF0C2417))),
+            Text(title,
+                style: const TextStyle(
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0C2417))),
             const SizedBox(height: 12),
             SizedBox(
               height: 150,
@@ -655,7 +742,8 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                   ),
                   if (activeData != null)
                     Positioned(
-                      left: 40.0 + (_selectedMilestoneIndex! * 50.0).clamp(0.0, 160.0),
+                      left: 40.0 +
+                          (_selectedMilestoneIndex! * 50.0).clamp(0.0, 160.0),
                       top: 10,
                       child: Container(
                         padding: const EdgeInsets.all(10),
@@ -674,10 +762,20 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(activeData['age'], style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text(activeData['age'],
+                                style: const TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text('• WHO Standard: ${activeData['who']} ${activeData['unit']}', style: const TextStyle(fontSize: 11, color: Color(0xFF556D5E))),
-                            Text('• Child Growth: ${activeData['child']} ${activeData['unit']}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0F3827))),
+                            Text(
+                                '• WHO Standard: ${activeData['who']} ${activeData['unit']}',
+                                style: const TextStyle(
+                                    fontSize: 11, color: Color(0xFF556D5E))),
+                            Text(
+                                '• Child Growth: ${activeData['child']} ${activeData['unit']}',
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0F3827))),
                           ],
                         ),
                       ),
@@ -695,17 +793,23 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                             });
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: isSel ? const Color(0xFF0C2417) : Colors.transparent,
+                              color: isSel
+                                  ? const Color(0xFF0C2417)
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               milestones[idx]['age'],
                               style: TextStyle(
                                 fontSize: 11,
-                                fontWeight: isSel ? FontWeight.bold : FontWeight.w600,
-                                color: isSel ? Colors.white : const Color(0xFF64748B),
+                                fontWeight:
+                                    isSel ? FontWeight.bold : FontWeight.w600,
+                                color: isSel
+                                    ? Colors.white
+                                    : const Color(0xFF64748B),
                               ),
                             ),
                           ),
@@ -768,14 +872,17 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                 backgroundColor: AppColors.forestGreen,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   Icon(Icons.add, size: 18),
                   SizedBox(width: 6),
-                  Text('Log New Vitals', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5)),
+                  Text('Log New Vitals',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14.5)),
                 ],
               ),
             ),
@@ -819,7 +926,8 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                   child: LinearProgressIndicator(
                     value: _calcStep / 5.0,
                     backgroundColor: const Color(0xFFDBE6DB),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF84CC16)),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Color(0xFF84CC16)),
                     minHeight: 6,
                   ),
                 ),
@@ -839,11 +947,22 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
 
           // STEP 1: Select Gender
           if (_calcStep == 1) ...[
-            const Text('WHO GROWTH STANDARDS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+            const Text('WHO GROWTH STANDARDS',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556D5E),
+                    letterSpacing: 0.8)),
             const SizedBox(height: 4),
-            const Text('Select gender', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+            const Text('Select gender',
+                style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0C2417))),
             const SizedBox(height: 4),
-            const Text('Gender helps us compare measurements with the right WHO growth standard.', style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
+            const Text(
+                'Gender helps us compare measurements with the right WHO growth standard.',
+                style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -853,18 +972,30 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       decoration: BoxDecoration(
-                        color: _calcGender == 'Boy' ? const Color(0xFFECF7ED) : Colors.white,
+                        color: _calcGender == 'Boy'
+                            ? const Color(0xFFECF7ED)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: _calcGender == 'Boy' ? const Color(0xFF10B981) : const Color(0xFFE2EAE2),
+                          color: _calcGender == 'Boy'
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFE2EAE2),
                           width: _calcGender == 'Boy' ? 2 : 1,
                         ),
                       ),
                       child: Column(
                         children: const [
-                          CircleAvatar(radius: 28, backgroundColor: Color(0xFFDCFCE7), child: Text('👶', style: TextStyle(fontSize: 26))),
+                          CircleAvatar(
+                              radius: 28,
+                              backgroundColor: Color(0xFFDCFCE7),
+                              child:
+                                  Text('👶', style: TextStyle(fontSize: 26))),
                           SizedBox(height: 10),
-                          Text('Boy', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                          Text('Boy',
+                              style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0C2417))),
                         ],
                       ),
                     ),
@@ -877,18 +1008,30 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       decoration: BoxDecoration(
-                        color: _calcGender == 'Girl' ? const Color(0xFFECF7ED) : Colors.white,
+                        color: _calcGender == 'Girl'
+                            ? const Color(0xFFECF7ED)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: _calcGender == 'Girl' ? const Color(0xFF10B981) : const Color(0xFFE2EAE2),
+                          color: _calcGender == 'Girl'
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFE2EAE2),
                           width: _calcGender == 'Girl' ? 2 : 1,
                         ),
                       ),
                       child: Column(
                         children: const [
-                          CircleAvatar(radius: 28, backgroundColor: Color(0xFFDCFCE7), child: Text('🌸', style: TextStyle(fontSize: 26))),
+                          CircleAvatar(
+                              radius: 28,
+                              backgroundColor: Color(0xFFDCFCE7),
+                              child:
+                                  Text('🌸', style: TextStyle(fontSize: 26))),
                           SizedBox(height: 10),
-                          Text('Girl', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                          Text('Girl',
+                              style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0C2417))),
                         ],
                       ),
                     ),
@@ -900,11 +1043,21 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
 
           // STEP 2: Enter Age
           else if (_calcStep == 2) ...[
-            const Text('WHO GROWTH STANDARDS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+            const Text('WHO GROWTH STANDARDS',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556D5E),
+                    letterSpacing: 0.8)),
             const SizedBox(height: 4),
-            const Text('Enter age', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+            const Text('Enter age',
+                style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0C2417))),
             const SizedBox(height: 4),
-            const Text("Choose the child's age in years and months.", style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
+            const Text("Choose the child's age in years and months.",
+                style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(20),
@@ -918,15 +1071,21 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                   GestureDetector(
                     onVerticalDragUpdate: (details) {
                       if (details.primaryDelta! < -5) {
-                        setState(() => _calcAgeYears = (_calcAgeYears + 1).clamp(0, 25));
+                        setState(() =>
+                            _calcAgeYears = (_calcAgeYears + 1).clamp(0, 25));
                       } else if (details.primaryDelta! > 5) {
-                        setState(() => _calcAgeYears = (_calcAgeYears - 1).clamp(0, 25));
+                        setState(() =>
+                            _calcAgeYears = (_calcAgeYears - 1).clamp(0, 25));
                       }
                     },
                     child: Column(
                       children: [
                         if (_calcAgeYears > 0)
-                          Text('${_calcAgeYears - 1}', style: const TextStyle(fontSize: 18, color: Color(0xFFCBD5E1), fontWeight: FontWeight.w600)),
+                          Text('${_calcAgeYears - 1}',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Color(0xFFCBD5E1),
+                                  fontWeight: FontWeight.w600)),
                         const SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -936,26 +1095,38 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                               style: TextStyle(
                                 fontSize: 46,
                                 fontWeight: FontWeight.w900,
-                                color: isAgeValid ? const Color(0xFF0C2417) : const Color(0xFFEF4444),
+                                color: isAgeValid
+                                    ? const Color(0xFF0C2417)
+                                    : const Color(0xFFEF4444),
                               ),
                             ),
                             const SizedBox(width: 4),
                             Container(
                               width: 3,
                               height: 36,
-                              color: isAgeValid ? const Color(0xFF0C2417) : const Color(0xFFEF4444),
+                              color: isAgeValid
+                                  ? const Color(0xFF0C2417)
+                                  : const Color(0xFFEF4444),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text('${_calcAgeYears + 1}', style: const TextStyle(fontSize: 18, color: Color(0xFFCBD5E1), fontWeight: FontWeight.w600)),
+                        Text('${_calcAgeYears + 1}',
+                            style: const TextStyle(
+                                fontSize: 18,
+                                color: Color(0xFFCBD5E1),
+                                fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
                   if (!isAgeValid)
                     const Padding(
                       padding: EdgeInsets.only(top: 8),
-                      child: Text('Age exceeds standard WHO chart (max 18)', style: TextStyle(color: Color(0xFFEF4444), fontSize: 11.5, fontWeight: FontWeight.bold)),
+                      child: Text('Age exceeds standard WHO chart (max 18)',
+                          style: TextStyle(
+                              color: Color(0xFFEF4444),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold)),
                     ),
                 ],
               ),
@@ -971,17 +1142,25 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('MONTHS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF556D5E))),
+                  const Text('MONTHS',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF556D5E))),
                   Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove, size: 16),
-                        onPressed: () => setState(() => _calcAgeMonths = (_calcAgeMonths - 1).clamp(0, 11)),
+                        onPressed: () => setState(() =>
+                            _calcAgeMonths = (_calcAgeMonths - 1).clamp(0, 11)),
                       ),
-                      Text('$_calcAgeMonths', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                      Text('$_calcAgeMonths',
+                          style: const TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: const Icon(Icons.add, size: 16),
-                        onPressed: () => setState(() => _calcAgeMonths = (_calcAgeMonths + 1).clamp(0, 11)),
+                        onPressed: () => setState(() =>
+                            _calcAgeMonths = (_calcAgeMonths + 1).clamp(0, 11)),
                       ),
                     ],
                   ),
@@ -992,18 +1171,31 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
 
           // STEP 3: Enter Weight (Measurement Scale)
           else if (_calcStep == 3) ...[
-            const Text('WHO GROWTH STANDARDS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+            const Text('WHO GROWTH STANDARDS',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556D5E),
+                    letterSpacing: 0.8)),
             const SizedBox(height: 4),
-            const Text('Enter weight', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+            const Text('Enter weight',
+                style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0C2417))),
             const SizedBox(height: 4),
-            const Text('Drag the scale to set the latest measured weight.', style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
+            const Text('Drag the scale to set the latest measured weight.',
+                style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: isWeightValid ? const Color(0xFFE2EAE2) : const Color(0xFFEF4444).withOpacity(0.4)),
+                border: Border.all(
+                    color: isWeightValid
+                        ? const Color(0xFFE2EAE2)
+                        : const Color(0xFFEF4444).withOpacity(0.4)),
               ),
               child: Column(
                 children: [
@@ -1012,7 +1204,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     style: TextStyle(
                       fontSize: 52,
                       fontWeight: FontWeight.w900,
-                      color: isWeightValid ? const Color(0xFF0C2417) : const Color(0xFFEF4444),
+                      color: isWeightValid
+                          ? const Color(0xFF0C2417)
+                          : const Color(0xFFEF4444),
                       fontFamily: 'monospace',
                       letterSpacing: -1,
                     ),
@@ -1022,7 +1216,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: isWeightValid ? const Color(0xFF556D5E) : const Color(0xFFEF4444),
+                      color: isWeightValid
+                          ? const Color(0xFF556D5E)
+                          : const Color(0xFFEF4444),
                       letterSpacing: 1,
                     ),
                   ),
@@ -1038,7 +1234,10 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     const Padding(
                       padding: EdgeInsets.only(top: 8),
                       child: Text('Invalid weight: Must be 2 kg to 80 kg',
-                          style: TextStyle(color: Color(0xFFEF4444), fontSize: 11.5, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              color: Color(0xFFEF4444),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold)),
                     ),
                 ],
               ),
@@ -1047,18 +1246,31 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
 
           // STEP 4: Enter Height (Measurement Ruler)
           else if (_calcStep == 4) ...[
-            const Text('WHO GROWTH STANDARDS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+            const Text('WHO GROWTH STANDARDS',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556D5E),
+                    letterSpacing: 0.8)),
             const SizedBox(height: 4),
-            const Text('Enter height', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+            const Text('Enter height',
+                style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0C2417))),
             const SizedBox(height: 4),
-            const Text('Drag the scale to set the latest measured height.', style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
+            const Text('Drag the scale to set the latest measured height.',
+                style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: isHeightValid ? const Color(0xFFBBF7D0) : const Color(0xFFEF4444).withOpacity(0.4)),
+                border: Border.all(
+                    color: isHeightValid
+                        ? const Color(0xFFBBF7D0)
+                        : const Color(0xFFEF4444).withOpacity(0.4)),
               ),
               child: Column(
                 children: [
@@ -1067,7 +1279,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     style: TextStyle(
                       fontSize: 52,
                       fontWeight: FontWeight.w900,
-                      color: isHeightValid ? const Color(0xFF0C2417) : const Color(0xFFEF4444),
+                      color: isHeightValid
+                          ? const Color(0xFF0C2417)
+                          : const Color(0xFFEF4444),
                       fontFamily: 'monospace',
                       letterSpacing: -1,
                     ),
@@ -1077,7 +1291,9 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: isHeightValid ? const Color(0xFF556D5E) : const Color(0xFFEF4444),
+                      color: isHeightValid
+                          ? const Color(0xFF556D5E)
+                          : const Color(0xFFEF4444),
                       letterSpacing: 1,
                     ),
                   ),
@@ -1093,7 +1309,10 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     const Padding(
                       padding: EdgeInsets.only(top: 8),
                       child: Text('Invalid height: Must be 45 cm to 190 cm',
-                          style: TextStyle(color: Color(0xFFEF4444), fontSize: 11.5, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              color: Color(0xFFEF4444),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold)),
                     ),
                 ],
               ),
@@ -1102,18 +1321,36 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
 
           // STEP 5: Growth Report
           else if (_calcStep == 5) ...[
-            const Text('WHO GROWTH STANDARDS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+            const Text('WHO GROWTH STANDARDS',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556D5E),
+                    letterSpacing: 0.8)),
             const SizedBox(height: 4),
-            const Text('Growth report', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+            const Text('Growth report',
+                style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0C2417))),
             const SizedBox(height: 4),
-            Text("${childName}'s measurements compared with WHO growth standards.", style: const TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
+            Text(
+                "${childName}'s measurements compared with WHO growth standards.",
+                style: const TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 20),
             Center(
               child: Column(
                 children: [
-                  const Text('On Track', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                  const Text('On Track',
+                      style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF0C2417))),
                   const SizedBox(height: 2),
-                  Text('${childName} is tracking within the current recorded range.', style: const TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
+                  Text(
+                      '${childName} is tracking within the current recorded range.',
+                      style: const TextStyle(
+                          fontSize: 13, color: Color(0xFF5A7263))),
                 ],
               ),
             ),
@@ -1130,9 +1367,21 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('BELOW', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
-                      Text('HEALTHY RANGE', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
-                      Text('ABOVE', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                      Text('BELOW',
+                          style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF64748B))),
+                      Text('HEALTHY RANGE',
+                          style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF64748B))),
+                      Text('ABOVE',
+                          style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF64748B))),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -1141,7 +1390,11 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF6EE7B7), Color(0xFF34D399), Color(0xFFF87171)],
+                        colors: [
+                          Color(0xFF6EE7B7),
+                          Color(0xFF34D399),
+                          Color(0xFFF87171)
+                        ],
                       ),
                     ),
                   ),
@@ -1149,9 +1402,17 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Text('${_calcWeight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
-                      Text('${_calcHeight.toStringAsFixed(1)} cm', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
-                      const Text('75th percentile', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Color(0xFF0F3827))),
+                      Text('${_calcWeight.toStringAsFixed(1)} kg',
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w900)),
+                      Text('${_calcHeight.toStringAsFixed(1)} cm',
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w900)),
+                      const Text('75th percentile',
+                          style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0F3827))),
                     ],
                   ),
                 ],
@@ -1167,7 +1428,8 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
             children: const [
               Icon(Icons.info_outline, size: 14, color: Color(0xFF556D5E)),
               SizedBox(width: 4),
-              Text('This will be saved to your profile', style: TextStyle(fontSize: 11.5, color: Color(0xFF556D5E))),
+              Text('This will be saved to your profile',
+                  style: TextStyle(fontSize: 11.5, color: Color(0xFF556D5E))),
             ],
           ),
           const SizedBox(height: 10),
@@ -1203,7 +1465,8 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
               backgroundColor: AppColors.forestGreen,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1214,7 +1477,8 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget> on State<T>, SingleTickerPr
                       : _calcStep == 4
                           ? 'View Growth Report →'
                           : 'Save to Profile ✓',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14.5),
                 ),
               ],
             ),
@@ -1254,12 +1518,14 @@ class _GrowthCurvePainter extends CustomPainter {
 
     final whoPath = Path();
     whoPath.moveTo(20, size.height * 0.85);
-    whoPath.quadraticBezierTo(size.width * 0.4, size.height * 0.5, size.width - 20, size.height * 0.25);
+    whoPath.quadraticBezierTo(size.width * 0.4, size.height * 0.5,
+        size.width - 20, size.height * 0.25);
     canvas.drawPath(whoPath, whoPaint);
 
     final childPath = Path();
     childPath.moveTo(20, size.height * 0.8);
-    childPath.quadraticBezierTo(size.width * 0.4, size.height * 0.45, size.width - 20, size.height * 0.2);
+    childPath.quadraticBezierTo(size.width * 0.4, size.height * 0.45,
+        size.width - 20, size.height * 0.2);
     canvas.drawPath(childPath, childPaint);
 
     final dotPaint = Paint()..color = const Color(0xFF0F3827);
@@ -1314,7 +1580,8 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
   static const double _kgPerLb = 0.45359237;
   bool _showPounds = false;
 
-  double get _displayValue => _showPounds ? widget.value / _kgPerLb : widget.value;
+  double get _displayValue =>
+      _showPounds ? widget.value / _kgPerLb : widget.value;
 
   double _snapKg(double value) {
     final clamped = value.clamp(widget.minValue, widget.maxValue);
@@ -1333,9 +1600,13 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final accent = widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
-    final track = widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
-    final ratio = ((widget.value - widget.minValue) / (widget.maxValue - widget.minValue)).clamp(0.0, 1.0);
+    final accent =
+        widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
+    final track =
+        widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
+    final ratio =
+        ((widget.value - widget.minValue) / (widget.maxValue - widget.minValue))
+            .clamp(0.0, 1.0);
 
     return Container(
       height: 220,
@@ -1352,15 +1623,23 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
             children: [
               const Text(
                 'WEIGHT SCALE',
-                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 1),
+                style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556D5E),
+                    letterSpacing: 1),
               ),
               Container(
                 padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(color: const Color(0xFFE3ECE4), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                    color: const Color(0xFFE3ECE4),
+                    borderRadius: BorderRadius.circular(20)),
                 child: Row(
                   children: [
-                    _unitButton('KG', !_showPounds, () => setState(() => _showPounds = false)),
-                    _unitButton('LB', _showPounds, () => setState(() => _showPounds = true)),
+                    _unitButton('KG', !_showPounds,
+                        () => setState(() => _showPounds = false)),
+                    _unitButton('LB', _showPounds,
+                        () => setState(() => _showPounds = true)),
                   ],
                 ),
               ),
@@ -1369,7 +1648,12 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
           const SizedBox(height: 4),
           Text(
             '${_showPounds ? _displayValue.round() : _displayValue.toStringAsFixed(1)} ${_showPounds ? 'lb' : 'kg'}',
-            style: TextStyle(fontSize: 42, height: 1.05, fontWeight: FontWeight.w900, color: accent, fontFamily: 'monospace'),
+            style: TextStyle(
+                fontSize: 42,
+                height: 1.05,
+                fontWeight: FontWeight.w900,
+                color: accent,
+                fontFamily: 'monospace'),
           ),
           const SizedBox(height: 10),
           Expanded(
@@ -1379,8 +1663,10 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
                 final thumbLeft = ratio * (rulerWidth - 20);
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onHorizontalDragUpdate: (details) => _changeByPixels(details.primaryDelta ?? 0),
-                  onTapDown: (details) => _setFromPosition(details.localPosition.dx, rulerWidth),
+                  onHorizontalDragUpdate: (details) =>
+                      _changeByPixels(details.primaryDelta ?? 0),
+                  onTapDown: (details) =>
+                      _setFromPosition(details.localPosition.dx, rulerWidth),
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -1398,7 +1684,12 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
                         left: rulerWidth / 2 - 1.5,
                         top: 0,
                         bottom: 26,
-                        child: IgnorePointer(child: Container(width: 3, decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(2)))),
+                        child: IgnorePointer(
+                            child: Container(
+                                width: 3,
+                                decoration: BoxDecoration(
+                                    color: accent,
+                                    borderRadius: BorderRadius.circular(2)))),
                       ),
                       Positioned(
                         left: 0,
@@ -1412,8 +1703,12 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onHorizontalDragUpdate: (details) {
-                            final nextRatio = ((thumbLeft + details.delta.dx) / (rulerWidth - 20)).clamp(0.0, 1.0);
-                            widget.onChanged(_snapKg(widget.minValue + nextRatio * (widget.maxValue - widget.minValue)));
+                            final nextRatio = ((thumbLeft + details.delta.dx) /
+                                    (rulerWidth - 20))
+                                .clamp(0.0, 1.0);
+                            widget.onChanged(_snapKg(widget.minValue +
+                                nextRatio *
+                                    (widget.maxValue - widget.minValue)));
                           },
                           child: Container(
                             width: 20,
@@ -1422,7 +1717,11 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
                               color: Colors.white,
                               shape: BoxShape.circle,
                               border: Border.all(color: accent, width: 2.5),
-                              boxShadow: [BoxShadow(color: accent.withOpacity(0.25), blurRadius: 8)],
+                              boxShadow: [
+                                BoxShadow(
+                                    color: accent.withOpacity(0.25),
+                                    blurRadius: 8)
+                              ],
                             ),
                           ),
                         ),
@@ -1433,7 +1732,8 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
               },
             ),
           ),
-          Text('Drag the scale or thumb to adjust', style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
+          Text('Drag the scale or thumb to adjust',
+              style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
         ],
       ),
     );
@@ -1444,8 +1744,14 @@ class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(color: selected ? const Color(0xFF0F3827) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
-        child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: selected ? Colors.white : const Color(0xFF667D6F))),
+        decoration: BoxDecoration(
+            color: selected ? const Color(0xFF0F3827) : Colors.transparent,
+            borderRadius: BorderRadius.circular(16)),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: selected ? Colors.white : const Color(0xFF667D6F))),
       ),
     );
   }
@@ -1457,27 +1763,44 @@ class _WeightPickerPainter extends CustomPainter {
   final double maxValue;
   final Color accent;
 
-  _WeightPickerPainter({required this.value, required this.minValue, required this.maxValue, required this.accent});
+  _WeightPickerPainter(
+      {required this.value,
+      required this.minValue,
+      required this.maxValue,
+      required this.accent});
 
   @override
   void paint(Canvas canvas, Size size) {
     final range = maxValue - minValue;
     final pixelsPerUnit = size.width / range;
-    final minorPaint = Paint()..color = const Color(0xFFB3C4B6)..strokeWidth = 1.5;
-    final majorPaint = Paint()..color = const Color(0xFF6F8978)..strokeWidth = 2;
+    final minorPaint = Paint()
+      ..color = const Color(0xFFB3C4B6)
+      ..strokeWidth = 1.5;
+    final majorPaint = Paint()
+      ..color = const Color(0xFF6F8978)
+      ..strokeWidth = 2;
 
     for (int weight = minValue.toInt(); weight <= maxValue.toInt(); weight++) {
       final x = (weight - minValue) * pixelsPerUnit;
       final isMajor = weight % 10 == 0;
       final isMedium = weight % 5 == 0;
       final tickHeight = isMajor ? 30.0 : (isMedium ? 22.0 : 13.0);
-      canvas.drawLine(Offset(x, size.height - 28), Offset(x, size.height - 28 - tickHeight), isMajor ? majorPaint : minorPaint);
+      canvas.drawLine(
+          Offset(x, size.height - 28),
+          Offset(x, size.height - 28 - tickHeight),
+          isMajor ? majorPaint : minorPaint);
       if (isMajor) {
         final textPainter = TextPainter(
-          text: TextSpan(text: '$weight', style: const TextStyle(fontSize: 11, color: Color(0xFF6F8978), fontWeight: FontWeight.w700)),
+          text: TextSpan(
+              text: '$weight',
+              style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF6F8978),
+                  fontWeight: FontWeight.w700)),
           textDirection: TextDirection.ltr,
         )..layout();
-        textPainter.paint(canvas, Offset(x - textPainter.width / 2, size.height - 22));
+        textPainter.paint(
+            canvas, Offset(x - textPainter.width / 2, size.height - 22));
       }
     }
   }
@@ -1531,10 +1854,13 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final accent = widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
-    final track = widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
+    final accent =
+        widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
+    final track =
+        widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
     final range = widget.maxValue - widget.minValue;
-    final thumbPosition = ((widget.maxValue - widget.value) / range).clamp(0.0, 1.0);
+    final thumbPosition =
+        ((widget.maxValue - widget.value) / range).clamp(0.0, 1.0);
 
     return Container(
       height: 300,
@@ -1551,15 +1877,23 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
             children: [
               const Text(
                 'HEIGHT SCALE',
-                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 1),
+                style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556D5E),
+                    letterSpacing: 1),
               ),
               Container(
                 padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(color: const Color(0xFFE3ECE4), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                    color: const Color(0xFFE3ECE4),
+                    borderRadius: BorderRadius.circular(20)),
                 child: Row(
                   children: [
-                    _unitButton('CM', !_showInches, () => setState(() => _showInches = false)),
-                    _unitButton('IN', _showInches, () => setState(() => _showInches = true)),
+                    _unitButton('CM', !_showInches,
+                        () => setState(() => _showInches = false)),
+                    _unitButton('IN', _showInches,
+                        () => setState(() => _showInches = true)),
                   ],
                 ),
               ),
@@ -1572,8 +1906,10 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
                 final rulerHeight = constraints.maxHeight;
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (details) => _changeByPixels(details.primaryDelta ?? 0),
-                  onTapDown: (details) => _setFromPosition(details.localPosition.dy, rulerHeight),
+                  onVerticalDragUpdate: (details) =>
+                      _changeByPixels(details.primaryDelta ?? 0),
+                  onTapDown: (details) =>
+                      _setFromPosition(details.localPosition.dy, rulerHeight),
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -1600,14 +1936,19 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
                         right: 10,
                         top: 0,
                         bottom: 0,
-                        child: Container(width: 3, decoration: BoxDecoration(color: track, borderRadius: BorderRadius.circular(3))),
+                        child: Container(
+                            width: 3,
+                            decoration: BoxDecoration(
+                                color: track,
+                                borderRadius: BorderRadius.circular(3))),
                       ),
                       Positioned(
                         right: 1,
                         top: (rulerHeight - 20) * thumbPosition,
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
-                          onVerticalDragUpdate: (details) => _changeByPixels(details.primaryDelta ?? 0),
+                          onVerticalDragUpdate: (details) =>
+                              _changeByPixels(details.primaryDelta ?? 0),
                           child: Container(
                             width: 22,
                             height: 22,
@@ -1615,7 +1956,11 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
                               color: Colors.white,
                               shape: BoxShape.circle,
                               border: Border.all(color: accent, width: 2.5),
-                              boxShadow: [BoxShadow(color: accent.withOpacity(0.25), blurRadius: 8)],
+                              boxShadow: [
+                                BoxShadow(
+                                    color: accent.withOpacity(0.25),
+                                    blurRadius: 8)
+                              ],
                             ),
                           ),
                         ),
@@ -1626,7 +1971,10 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
                         child: IgnorePointer(
                           child: Text(
                             '${_displayValue.round()} ${_showInches ? 'in' : 'cm'}',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: accent),
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: accent),
                           ),
                         ),
                       ),
@@ -1637,7 +1985,8 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
             ),
           ),
           const SizedBox(height: 4),
-          Text('Drag the thumb or scale to adjust', style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
+          Text('Drag the thumb or scale to adjust',
+              style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
         ],
       ),
     );
@@ -1652,7 +2001,11 @@ class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
           color: selected ? const Color(0xFF0F3827) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: selected ? Colors.white : const Color(0xFF667D6F))),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: selected ? Colors.white : const Color(0xFF667D6F))),
       ),
     );
   }
@@ -1664,12 +2017,20 @@ class _HeightPickerPainter extends CustomPainter {
   final double maxValue;
   final Color accent;
 
-  _HeightPickerPainter({required this.value, required this.minValue, required this.maxValue, required this.accent});
+  _HeightPickerPainter(
+      {required this.value,
+      required this.minValue,
+      required this.maxValue,
+      required this.accent});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final tickPaint = Paint()..color = const Color(0xFFB3C4B6)..strokeWidth = 1.5;
-    final majorPaint = Paint()..color = const Color(0xFF6F8978)..strokeWidth = 2;
+    final tickPaint = Paint()
+      ..color = const Color(0xFFB3C4B6)
+      ..strokeWidth = 1.5;
+    final majorPaint = Paint()
+      ..color = const Color(0xFF6F8978)
+      ..strokeWidth = 2;
     final range = maxValue - minValue;
     final pixelsPerUnit = size.height / range;
 
@@ -1678,18 +2039,29 @@ class _HeightPickerPainter extends CustomPainter {
       final isMajor = height % 10 == 0;
       final isMedium = height % 5 == 0;
       final length = isMajor ? 34.0 : (isMedium ? 25.0 : 16.0);
-      canvas.drawLine(Offset(size.width - length, y), Offset(size.width, y), isMajor ? majorPaint : tickPaint);
+      canvas.drawLine(Offset(size.width - length, y), Offset(size.width, y),
+          isMajor ? majorPaint : tickPaint);
       if (isMajor) {
         final textPainter = TextPainter(
-          text: TextSpan(text: '$height', style: const TextStyle(fontSize: 11, color: Color(0xFF6F8978), fontWeight: FontWeight.w700)),
+          text: TextSpan(
+              text: '$height',
+              style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF6F8978),
+                  fontWeight: FontWeight.w700)),
           textDirection: TextDirection.ltr,
         )..layout();
-        textPainter.paint(canvas, Offset(size.width - length - textPainter.width - 8, y - textPainter.height / 2));
+        textPainter.paint(
+            canvas,
+            Offset(size.width - length - textPainter.width - 8,
+                y - textPainter.height / 2));
       }
     }
 
     final selectedY = (maxValue - value) * pixelsPerUnit;
-    final markerPaint = Paint()..color = accent..strokeWidth = 2.5;
+    final markerPaint = Paint()
+      ..color = accent
+      ..strokeWidth = 2.5;
     canvas.drawCircle(Offset(size.width - 3, selectedY), 5, markerPaint);
   }
 
@@ -1719,7 +2091,8 @@ class _MeasurementRulerWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<_MeasurementRulerWidget> createState() => _MeasurementRulerWidgetState();
+  State<_MeasurementRulerWidget> createState() =>
+      _MeasurementRulerWidgetState();
 }
 
 class _MeasurementRulerWidgetState extends State<_MeasurementRulerWidget> {
@@ -1736,9 +2109,8 @@ class _MeasurementRulerWidgetState extends State<_MeasurementRulerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final indicatorColor = widget.isValid
-        ? const Color(0xFF0F3827)
-        : const Color(0xFFEF4444);
+    final indicatorColor =
+        widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
     final tickColor = widget.isValid
         ? const Color(0xFFB0C4B8)
         : const Color(0xFFEF4444).withOpacity(0.4);
@@ -1753,8 +2125,9 @@ class _MeasurementRulerWidgetState extends State<_MeasurementRulerWidget> {
             .clamp(widget.minValue, widget.maxValue);
         // Round to minorStep precision
         final snapped = (newVal / widget.minorStep).round() * widget.minorStep;
-        widget.onChanged(
-            double.parse(snapped.clamp(widget.minValue, widget.maxValue).toStringAsFixed(1)));
+        widget.onChanged(double.parse(snapped
+            .clamp(widget.minValue, widget.maxValue)
+            .toStringAsFixed(1)));
       },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
@@ -1839,8 +2212,10 @@ class _MeasurementRulerPainter extends CustomPainter {
 
     // Calculate the range of values to draw (what's visible on screen)
     final visibleHalfRange = (size.width / 2.0) / pixelsPerUnit;
-    final startVal = (value - visibleHalfRange - majorStep).clamp(minValue, maxValue);
-    final endVal = (value + visibleHalfRange + majorStep).clamp(minValue, maxValue);
+    final startVal =
+        (value - visibleHalfRange - majorStep).clamp(minValue, maxValue);
+    final endVal =
+        (value + visibleHalfRange + majorStep).clamp(minValue, maxValue);
 
     // Find the first minor tick >= startVal (aligned to minorStep grid)
     double firstTick = (startVal / minorStep).floor() * minorStep;
@@ -1851,7 +2226,8 @@ class _MeasurementRulerPainter extends CustomPainter {
       final x = centerX + offset;
 
       if (x >= 0 && x <= size.width) {
-        final isMajor = ((tickVal / majorStep).round() * majorStep - tickVal).abs() < 0.01;
+        final isMajor =
+            ((tickVal / majorStep).round() * majorStep - tickVal).abs() < 0.01;
         final tickHeight = isMajor ? 28.0 : 14.0;
 
         final paint = isMajor ? majorPaint : minorPaint;
@@ -1908,5 +2284,6 @@ class _MeasurementRulerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _MeasurementRulerPainter oldDelegate) =>
-      oldDelegate.value != value || oldDelegate.indicatorColor != indicatorColor;
+      oldDelegate.value != value ||
+      oldDelegate.indicatorColor != indicatorColor;
 }
