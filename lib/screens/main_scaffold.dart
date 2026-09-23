@@ -110,7 +110,9 @@ class _MainScaffoldState extends State<MainScaffold> {
       body: SafeArea(
         child: Stack(
           children: [
-            _buildCurrentScreen(),
+            Positioned.fill(
+              child: _buildCurrentScreen(),
+            ),
             Positioned(
               left: 0,
               right: 0,

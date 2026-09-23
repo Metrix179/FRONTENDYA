@@ -37,6 +37,20 @@ class _MealData {
 class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
   bool _isDarkMode = false;
 
+  Color get _pageBackground =>
+      _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEEF3ED);
+  Color get _primaryText =>
+      _isDarkMode ? const Color(0xFFE8F2EA) : const Color(0xFF0C2417);
+  Color get _secondaryText =>
+      _isDarkMode ? const Color(0xFFA9C0B1) : const Color(0xFF556D5E);
+  Color get _cardColor => _isDarkMode ? const Color(0xFF1D3528) : Colors.white;
+  Color get _cardBorder =>
+      _isDarkMode ? const Color(0xFF34513F) : const Color(0xFFE2EAE2);
+  Color get _softSurface =>
+      _isDarkMode ? const Color(0xFF294535) : const Color(0xFFF1F6F1);
+  Color get _timelineSurface =>
+      _isDarkMode ? const Color(0xFF294535) : const Color(0xFFE3ECE3);
+
   late final List<_MealData> _meals = [
     _MealData(
       id: 'breakfast',
@@ -46,15 +60,18 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
       options: [
         {
           'title': 'Oatmeal with mashed bananas & almond dust',
-          'nutrition': 'Nutritional value: Approx. 220 kcal · 7 g protein · 5 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 220 kcal · 7 g protein · 5 g fiber',
         },
         {
           'title': 'Warm ragi porridge with grated apples & almonds',
-          'nutrition': 'Nutritional value: Approx. 220 kcal · 7 g protein · 5 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 220 kcal · 7 g protein · 5 g fiber',
         },
         {
           'title': 'Steamed idli with mild vegetable sambar & coconut drizzle',
-          'nutrition': 'Nutritional value: Approx. 205 kcal · 6.5 g protein · 4.5 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 205 kcal · 6.5 g protein · 4.5 g fiber',
         },
       ],
     ),
@@ -66,15 +83,18 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
       options: [
         {
           'title': 'Soft lentil soup (Dal) with mashed rice & ghee',
-          'nutrition': 'Nutritional value: Approx. 340 kcal · 11 g protein · 6 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 340 kcal · 11 g protein · 6 g fiber',
         },
         {
           'title': 'Mashed khichdi with ghee and steamed carrots',
-          'nutrition': 'Nutritional value: Approx. 315 kcal · 10.5 g protein · 6.5 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 315 kcal · 10.5 g protein · 6.5 g fiber',
         },
         {
           'title': 'Curd rice with steamed beetroot & tempered cumin',
-          'nutrition': 'Nutritional value: Approx. 290 kcal · 9.2 g protein · 4.8 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 290 kcal · 9.2 g protein · 4.8 g fiber',
         },
       ],
     ),
@@ -86,11 +106,13 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
       options: [
         {
           'title': 'Thinly sliced apples or pureed fruit with curd',
-          'nutrition': 'Nutritional value: Approx. 135 kcal · 3.5 g protein · 4.2 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 135 kcal · 3.5 g protein · 4.2 g fiber',
         },
         {
           'title': 'Roasted makhana with mashed banana puree',
-          'nutrition': 'Nutritional value: Approx. 145 kcal · 4 g protein · 3.8 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 145 kcal · 4 g protein · 3.8 g fiber',
         },
       ],
     ),
@@ -102,11 +124,13 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
       options: [
         {
           'title': 'Steamed vegetables and pumpkin porridge',
-          'nutrition': 'Nutritional value: Approx. 235 kcal · 5.5 g protein · 6.2 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 235 kcal · 5.5 g protein · 6.2 g fiber',
         },
         {
           'title': 'Soft moong dal cheela with mild mint dip',
-          'nutrition': 'Nutritional value: Approx. 250 kcal · 9 g protein · 5.5 g fiber',
+          'nutrition':
+              'Nutritional value: Approx. 250 kcal · 9 g protein · 5.5 g fiber',
         },
       ],
     ),
@@ -120,7 +144,8 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
     if (!mounted) return;
 
     setState(() {
-      meal.currentOptionIndex = (meal.currentOptionIndex + 1) % meal.options.length;
+      meal.currentOptionIndex =
+          (meal.currentOptionIndex + 1) % meal.options.length;
       meal.isSwapping = false;
     });
   }
@@ -128,7 +153,7 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEEF3ED),
+      backgroundColor: _pageBackground,
       body: SafeArea(
         child: Column(
           children: [
@@ -161,17 +186,18 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back, color: Color(0xFF0C2417)),
+                icon: Icon(Icons.arrow_back, color: _primaryText),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              const Icon(Icons.remove_red_eye_outlined, color: Color(0xFF0C2417), size: 22),
+              Icon(Icons.remove_red_eye_outlined,
+                  color: _primaryText, size: 22),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'Nutrition Plan',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF0C2417),
+                  color: _primaryText,
                 ),
               ),
             ],
@@ -185,9 +211,15 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                   height: 28,
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDFE8DF),
+                    color: _isDarkMode
+                        ? const Color(0xFF294535)
+                        : const Color(0xFFDFE8DF),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFCEDECE)),
+                    border: Border.all(
+                      color: _isDarkMode
+                          ? const Color(0xFF45624E)
+                          : const Color(0xFFCEDECE),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: _isDarkMode
@@ -206,7 +238,9 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                         child: Icon(
                           _isDarkMode ? Icons.nightlight_round : Icons.wb_sunny,
                           size: 13,
-                          color: _isDarkMode ? Colors.white : const Color(0xFF0C2417),
+                          color: _isDarkMode
+                              ? Colors.white
+                              : const Color(0xFF0C2417),
                         ),
                       ),
                     ],
@@ -214,10 +248,16 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 16,
-                backgroundColor: Color(0xFF0C2417),
-                child: Icon(Icons.person_outline, size: 16, color: Colors.white),
+                backgroundColor: _isDarkMode
+                    ? const Color(0xFF2AE196)
+                    : const Color(0xFF0C2417),
+                child: Icon(
+                  Icons.person_outline,
+                  size: 16,
+                  color: _isDarkMode ? const Color(0xFF0C2417) : Colors.white,
+                ),
               ),
             ],
           ),
@@ -234,19 +274,19 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
         children: [
           Text(
             "${widget.childName}'s Nutrition Plan",
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF0C2417),
+              color: _primaryText,
               letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: 3),
-          const Text(
+          Text(
             'Nourishing meal guide tailored for today.',
             style: TextStyle(
               fontSize: 13.5,
-              color: Color(0xFF556D5E),
+              color: _secondaryText,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -295,11 +335,22 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
             height: 36,
             margin: const EdgeInsets.only(top: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFE3ECE3),
+              color: _timelineSurface,
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFB5DAB5), width: 2),
+              border: Border.all(
+                color: _isDarkMode
+                    ? const Color(0xFF65B879)
+                    : const Color(0xFFB5DAB5),
+                width: 2,
+              ),
             ),
-            child: Icon(meal.icon, size: 16, color: const Color(0xFF2D613D)),
+            child: Icon(
+              meal.icon,
+              size: 16,
+              color: _isDarkMode
+                  ? const Color(0xFF9BE6AA)
+                  : const Color(0xFF2D613D),
+            ),
           ),
           const SizedBox(width: 12),
 
@@ -308,9 +359,9 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: _cardColor,
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: const Color(0xFFE2EAE2)),
+                border: Border.all(color: _cardBorder),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.02),
@@ -328,25 +379,26 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                     children: [
                       Text(
                         meal.category,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF0C2417),
+                          color: _primaryText,
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F6F1),
+                          color: _softSurface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2EAE2)),
+                          border: Border.all(color: _cardBorder),
                         ),
                         child: Text(
                           meal.time,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF556D5E),
+                            color: _secondaryText,
                           ),
                         ),
                       ),
@@ -357,10 +409,12 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                   // Option title
                   Text(
                     currentOption['title']!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF2C3F33),
+                      color: _isDarkMode
+                          ? const Color(0xFFD1E0D4)
+                          : const Color(0xFF2C3F33),
                       height: 1.35,
                     ),
                   ),
@@ -371,15 +425,17 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFBFDFB),
+                        color: _isDarkMode
+                            ? const Color(0xFF233E2E)
+                            : const Color(0xFFFBFDFB),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFEDF3ED)),
+                        border: Border.all(color: _cardBorder),
                       ),
                       child: Text(
                         currentOption['nutrition']!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11.5,
-                          color: Color(0xFF556D5E),
+                          color: _secondaryText,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -392,22 +448,25 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: () => setState(() => meal.isExpanded = !meal.isExpanded),
+                        onTap: () =>
+                            setState(() => meal.isExpanded = !meal.isExpanded),
                         child: Row(
                           children: [
                             Text(
                               meal.isExpanded ? 'Read less' : 'Read more',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0C2417),
+                                color: _primaryText,
                               ),
                             ),
                             const SizedBox(width: 4),
                             Icon(
-                              meal.isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                              meal.isExpanded
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down,
                               size: 16,
-                              color: const Color(0xFF0C2417),
+                              color: _primaryText,
                             ),
                           ],
                         ),
@@ -420,16 +479,19 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                                 ? const SizedBox(
                                     width: 14,
                                     height: 14,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF059669)),
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Color(0xFF059669)),
                                   )
-                                : const Icon(Icons.sync, size: 16, color: Color(0xFF0C2417)),
+                                : Icon(Icons.sync,
+                                    size: 16, color: _primaryText),
                             const SizedBox(width: 6),
                             Text(
                               meal.isSwapping ? 'Swapping...' : 'Swap Option',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0C2417),
+                                color: _primaryText,
                               ),
                             ),
                           ],

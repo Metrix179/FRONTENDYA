@@ -95,12 +95,12 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Home',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: _isDarkMode ? const Color(0xFFE8F2EA) : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -183,20 +183,20 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
         children: [
           Text(
             'Good morning, ${widget.childName}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 23,
               fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
+              color: _isDarkMode ? const Color(0xFFE8F2EA) : AppColors.textPrimary,
               letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             '${widget.childName} is doing well today.',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: _isDarkMode ? const Color(0xFFA9C0B1) : AppColors.textSecondary,
             ),
           ),
         ],

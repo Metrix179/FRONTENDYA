@@ -20,6 +20,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isHistoryView = false;
   int _historyMetricIndex = 0;
 
+  Color get _pageBackground =>
+      _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEEF3ED);
+  Color get _primaryText =>
+      _isDarkMode ? const Color(0xFFE8F2EA) : const Color(0xFF0C2417);
+  Color get _secondaryText =>
+      _isDarkMode ? const Color(0xFFA9C0B1) : const Color(0xFF556D5E);
+  Color get _cardColor => _isDarkMode ? const Color(0xFF1D3528) : Colors.white;
+  Color get _cardBorder =>
+      _isDarkMode ? const Color(0xFF34513F) : const Color(0xFFE2EAE2);
+  Color get _softSurface =>
+      _isDarkMode ? const Color(0xFF294535) : const Color(0xFFF4F7F4);
+  Color get _dividerColor =>
+      _isDarkMode ? const Color(0xFF34513F) : const Color(0xFFF0F4F0);
+
   String _childName = 'Aarav';
   String _age = '2 years, 3 months';
   String _gender = 'Boy';
@@ -36,15 +50,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEEF3ED),
+      backgroundColor: _pageBackground,
       body: SafeArea(
         child: Column(
           children: [
             _buildTopBar(),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-                child: _isHistoryView ? _buildHistoryView() : _buildProfileView(),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                child:
+                    _isHistoryView ? _buildHistoryView() : _buildProfileView(),
               ),
             ),
           ],
@@ -62,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back, color: Color(0xFF0C2417)),
+                icon: Icon(Icons.arrow_back, color: _primaryText),
                 onPressed: () {
                   if (_isHistoryView) {
                     setState(() => _isHistoryView = false);
@@ -71,14 +87,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
                 },
               ),
-              const Icon(Icons.remove_red_eye_outlined, color: Color(0xFF0C2417), size: 22),
+              Icon(Icons.remove_red_eye_outlined,
+                  color: _primaryText, size: 22),
               const SizedBox(width: 6),
               Text(
                 _isHistoryView ? 'Child History' : 'Child Profile',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF0C2417),
+                  color: _primaryText,
                 ),
               ),
             ],
@@ -92,9 +109,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 28,
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDFE8DF),
+                    color: _isDarkMode
+                        ? const Color(0xFF294535)
+                        : const Color(0xFFDFE8DF),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFCEDECE)),
+                    border: Border.all(
+                      color: _isDarkMode
+                          ? const Color(0xFF45624E)
+                          : const Color(0xFFCEDECE),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: _isDarkMode
@@ -113,7 +136,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Icon(
                           _isDarkMode ? Icons.nightlight_round : Icons.wb_sunny,
                           size: 13,
-                          color: _isDarkMode ? Colors.white : const Color(0xFF0C2417),
+                          color: _isDarkMode
+                              ? Colors.white
+                              : const Color(0xFF0C2417),
                         ),
                       ),
                     ],
@@ -121,10 +146,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 16,
-                backgroundColor: Color(0xFF0C2417),
-                child: Icon(Icons.person_outline, size: 16, color: Colors.white),
+                backgroundColor: _isDarkMode
+                    ? const Color(0xFF2AE196)
+                    : const Color(0xFF0C2417),
+                child: Icon(
+                  Icons.person_outline,
+                  size: 16,
+                  color: _isDarkMode ? const Color(0xFF0C2417) : Colors.white,
+                ),
               ),
             ],
           ),
@@ -140,10 +171,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // AARAV'S PROFILE
         Text(
           "${_childName.toUpperCase()}'S\nPROFILE",
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 44,
             fontWeight: FontWeight.w900,
-            color: Color(0xFF0C2417),
+            color: _primaryText,
             height: 0.94,
             letterSpacing: -1,
           ),
@@ -155,27 +186,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onTap: () => setState(() => _isHistoryView = true),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border.symmetric(
-                horizontal: BorderSide(color: Color(0xFFD8E3D8)),
+                horizontal: BorderSide(
+                  color: _isDarkMode
+                      ? const Color(0xFF34513F)
+                      : const Color(0xFFD8E3D8),
+                ),
               ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
                   'CHILD HISTORY',
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFF556D5E),
+                    color: _secondaryText,
                     letterSpacing: 1.2,
                   ),
                 ),
                 Row(
                   children: [
-                    Text('01—05', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF556D5E))),
-                    Icon(Icons.chevron_right, size: 18, color: Color(0xFF556D5E)),
+                    Text('01—05',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: _secondaryText)),
+                    Icon(Icons.chevron_right, size: 18, color: _secondaryText),
                   ],
                 ),
               ],
@@ -190,9 +229,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _cardColor,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE2EAE2)),
+            border: Border.all(color: _cardBorder),
           ),
           child: Row(
             children: [
@@ -200,16 +239,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4F7F4),
+                  color: _softSurface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFD8E3D8), style: BorderStyle.solid),
+                  border: Border.all(
+                    color: _isDarkMode
+                        ? const Color(0xFF45624E)
+                        : const Color(0xFFD8E3D8),
+                    style: BorderStyle.solid,
+                  ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.add_photo_alternate_outlined, size: 28, color: Color(0xFF556D5E)),
-                    SizedBox(height: 4),
-                    Text('NO PHOTO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+                  children: [
+                    Icon(Icons.add_photo_alternate_outlined,
+                        size: 28, color: _secondaryText),
+                    const SizedBox(height: 4),
+                    Text('NO PHOTO',
+                        style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            color: _secondaryText,
+                            letterSpacing: 0.8)),
                   ],
                 ),
               ),
@@ -221,7 +271,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(_childName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                        Text(_childName,
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                color: _primaryText)),
                         IconButton(
                           icon: const Icon(Icons.edit_outlined, size: 18),
                           onPressed: _showEditChildModal,
@@ -236,8 +290,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('STATUS', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 0.6)),
-                        Text(_status, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900, color: Color(0xFF10B981))),
+                        Text('STATUS',
+                            style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                color: _secondaryText,
+                                letterSpacing: 0.6)),
+                        Text(_status,
+                            style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF10B981))),
                       ],
                     ),
                   ],
@@ -254,9 +317,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _cardColor,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE2EAE2)),
+            border: Border.all(color: _cardBorder),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -264,9 +327,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_parentName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                  Text(_parentName,
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: _primaryText)),
                   const SizedBox(height: 2),
-                  Text(_accountType, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Color(0xFF556D5E))),
+                  Text(_accountType,
+                      style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: _secondaryText)),
                 ],
               ),
               IconButton(
@@ -283,16 +354,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _cardColor,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE2EAE2)),
+            border: Border.all(color: _cardBorder),
           ),
           child: Column(
             children: [
               _menuItem('01', Icons.notifications_none, 'Notifications'),
-              const Divider(height: 1, color: Color(0xFFF0F4F0)),
+              Divider(height: 1, color: _dividerColor),
               _menuItem('02', Icons.settings_outlined, 'App Settings'),
-              const Divider(height: 1, color: Color(0xFFF0F4F0)),
+              Divider(height: 1, color: _dividerColor),
               _menuItem('03', Icons.people_outline, 'Manage Profiles'),
             ],
           ),
@@ -304,14 +375,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _cardColor,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE2EAE2)),
+            border: Border.all(color: _cardBorder),
           ),
           child: Column(
             children: [
               _menuItem('01', Icons.help_outline, 'Help Center'),
-              const Divider(height: 1, color: Color(0xFFF0F4F0)),
+              Divider(height: 1, color: _dividerColor),
               _menuItem('02', Icons.shield_outlined, 'Privacy & Security'),
             ],
           ),
@@ -320,20 +391,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         // 05 Sign Out
         GestureDetector(
-          onTap: widget.onLogout ?? () => Navigator.of(context).popUntil((route) => route.isFirst),
+          onTap: widget.onLogout ??
+              () => Navigator.of(context).popUntil((route) => route.isFirst),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text('05', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Color(0xFF556D5E))),
-                  SizedBox(width: 10),
-                  Text('Sign Out', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                  Text('05',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          color: _secondaryText)),
+                  const SizedBox(width: 10),
+                  Text('Sign Out',
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: _primaryText)),
                 ],
               ),
-              Icon(Icons.logout, color: Color(0xFF0C2417), size: 24),
+              Icon(Icons.logout, color: _primaryText, size: 24),
             ],
           ),
         ),
@@ -344,64 +424,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildHistoryView() {
     final metrics = [
-      {'label': 'HEIGHT', 'value': '90.5 cm', 'icon': Icons.straighten, 'idx': '01 / 03'},
-      {'label': 'WEIGHT', 'value': '14.8 kg', 'icon': Icons.scale, 'idx': '02 / 03'},
-      {'label': 'AGE', 'value': '13y 6m', 'icon': Icons.calendar_today, 'idx': '03 / 03'},
+      {
+        'label': 'HEIGHT',
+        'value': '90.5 cm',
+        'icon': Icons.straighten,
+        'idx': '01 / 03'
+      },
+      {
+        'label': 'WEIGHT',
+        'value': '14.8 kg',
+        'icon': Icons.scale,
+        'idx': '02 / 03'
+      },
+      {
+        'label': 'AGE',
+        'value': '13y 6m',
+        'icon': Icons.calendar_today,
+        'idx': '03 / 03'
+      },
     ];
     final active = metrics[_historyMetricIndex];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text('CHILD HISTORY', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF556D5E), letterSpacing: 1.5)),
+        Text('CHILD HISTORY',
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: _secondaryText,
+                letterSpacing: 1.5)),
         const SizedBox(height: 2),
-        Text(_childName, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+        Text(_childName,
+            style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                color: _primaryText)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFFE8F5E8),
+            color:
+                _isDarkMode ? const Color(0xFF214A35) : const Color(0xFFE8F5E8),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFBCE4BC)),
+            border: Border.all(
+                color: _isDarkMode
+                    ? const Color(0xFF4B9962)
+                    : const Color(0xFFBCE4BC)),
           ),
-          child: const Text('Health status : Healthy', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF065F46))),
+          child: const Text('Health status : Healthy',
+              style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF065F46))),
         ),
         const SizedBox(height: 10),
-        const Text('A clear record of growth, scans, and clinical notes.', style: TextStyle(fontSize: 13, color: Color(0xFF556D5E))),
+        Text('A clear record of growth, scans, and clinical notes.',
+            style: TextStyle(fontSize: 13, color: _secondaryText)),
         const SizedBox(height: 16),
 
         // CURRENT DETAILS (01 / 03)
-        Align(alignment: Alignment.centerLeft, child: _buildSectionHeader('CURRENT DETAILS', right: active['idx'] as String)),
+        Align(
+            alignment: Alignment.centerLeft,
+            child: _buildSectionHeader('CURRENT DETAILS',
+                right: active['idx'] as String)),
         const SizedBox(height: 8),
         GestureDetector(
-          onTap: () => setState(() => _historyMetricIndex = (_historyMetricIndex + 1) % metrics.length),
+          onTap: () => setState(() =>
+              _historyMetricIndex = (_historyMetricIndex + 1) % metrics.length),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: _cardColor,
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: const Color(0xFFE2EAE2)),
+              border: Border.all(color: _cardBorder),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(active['icon'] as IconData, color: const Color(0xFF445B4E)),
+                Icon(active['icon'] as IconData, color: _secondaryText),
                 const SizedBox(height: 10),
-                Text(active['label'] as String, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF556D5E), letterSpacing: 1)),
+                Text(active['label'] as String,
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: _secondaryText,
+                        letterSpacing: 1)),
                 const SizedBox(height: 4),
-                Text(active['value'] as String, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                Text(active['value'] as String,
+                    style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        color: _primaryText)),
                 const SizedBox(height: 12),
                 Row(
-                  children: List.generate(metrics.length, (i) => Container(
-                    margin: const EdgeInsets.only(right: 6),
-                    width: i == _historyMetricIndex ? 22 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: i == _historyMetricIndex ? const Color(0xFF10B981) : const Color(0xFFD0DDD0),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  )),
+                  children: List.generate(
+                      metrics.length,
+                      (i) => Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            width: i == _historyMetricIndex ? 22 : 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: i == _historyMetricIndex
+                                  ? const Color(0xFF10B981)
+                                  : (_isDarkMode
+                                      ? const Color(0xFF45624E)
+                                      : const Color(0xFFD0DDD0)),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          )),
                 ),
               ],
             ),
@@ -410,27 +542,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 18),
 
         // PREVIOUS SCANS
-        Align(alignment: Alignment.centerLeft, child: _buildSectionHeader('PREVIOUS SCANS & RECORDS', right: '01 entries')),
+        Align(
+            alignment: Alignment.centerLeft,
+            child: _buildSectionHeader('PREVIOUS SCANS & RECORDS',
+                right: '01 entries')),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _cardColor,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE2EAE2)),
+            border: Border.all(color: _cardBorder),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('GROWTH TRACKING', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF556D5E))),
-                  Text('22 Sept 2026, 7:25 pm', style: TextStyle(fontSize: 11.5, color: Color(0xFF556D5E))),
+                children: [
+                  Text('GROWTH TRACKING',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          color: _secondaryText)),
+                  Text('22 Sept 2026, 7:25 pm',
+                      style: TextStyle(fontSize: 11.5, color: _secondaryText)),
                 ],
               ),
               const SizedBox(height: 6),
-              const Text('On Track', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+              Text('On Track',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: _primaryText)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -446,23 +590,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 18),
 
         // DOCTOR'S PRESCRIPTION
-        Align(alignment: Alignment.centerLeft, child: _buildSectionHeader("DOCTOR'S PRESCRIPTION", right: '03 / 03')),
+        Align(
+            alignment: Alignment.centerLeft,
+            child:
+                _buildSectionHeader("DOCTOR'S PRESCRIPTION", right: '03 / 03')),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _cardColor,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE2EAE2)),
+            border: Border.all(color: _cardBorder),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text('Continue the current care plan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
-              SizedBox(height: 6),
-              Text('Keep regular meals, hydration, and outdoor play consistent. Bring this record to the next pediatric review.', style: TextStyle(fontSize: 13, color: Color(0xFF3D5345), height: 1.4)),
-              SizedBox(height: 10),
-              Text('📄 REVIEW AT NEXT VISIT', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w900, color: Color(0xFF556D5E))),
+            children: [
+              Text('Continue the current care plan',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: _primaryText)),
+              const SizedBox(height: 6),
+              Text(
+                  'Keep regular meals, hydration, and outdoor play consistent. Bring this record to the next pediatric review.',
+                  style: TextStyle(
+                      fontSize: 13, color: _secondaryText, height: 1.4)),
+              const SizedBox(height: 10),
+              Text('📄 REVIEW AT NEXT VISIT',
+                  style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                      color: _secondaryText)),
             ],
           ),
         ),
@@ -478,14 +636,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: AppColors.forestGreen,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Icon(Icons.picture_as_pdf, size: 18),
               SizedBox(width: 8),
-              Text('Export PDF report', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold)),
+              Text('Export PDF report',
+                  style:
+                      TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -498,8 +659,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF556D5E), letterSpacing: 0.8)),
-        Text(right, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF556D5E))),
+        Text(title,
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: _secondaryText,
+                letterSpacing: 0.8)),
+        Text(right,
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: _secondaryText)),
       ],
     );
   }
@@ -508,8 +678,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF556D5E), letterSpacing: 0.6)),
-        Text(value, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Color(0xFF0C2417))),
+        Text(label,
+            style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                color: _secondaryText,
+                letterSpacing: 0.6)),
+        Text(value,
+            style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.bold,
+                color: _primaryText)),
       ],
     );
   }
@@ -522,14 +701,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Row(
             children: [
-              Text(num, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF556D5E))),
+              Text(num,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: _secondaryText)),
               const SizedBox(width: 12),
-              Icon(icon, size: 18, color: const Color(0xFF0C2417)),
+              Icon(icon, size: 18, color: _primaryText),
               const SizedBox(width: 10),
-              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0C2417))),
+              Text(title,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: _primaryText)),
             ],
           ),
-          const Icon(Icons.chevron_right, size: 18, color: Color(0xFF556D5E)),
+          Icon(Icons.chevron_right, size: 18, color: _secondaryText),
         ],
       ),
     );
@@ -539,9 +726,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF556D5E))),
+        Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: _secondaryText)),
         const SizedBox(height: 2),
-        Text(val, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+        Text(val,
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: _primaryText)),
       ],
     );
   }
@@ -556,20 +751,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Text('Edit child profile', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+        title: const Text('Edit child profile',
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name')),
-              TextField(controller: ageCtrl, decoration: const InputDecoration(labelText: 'Age')),
-              TextField(controller: genderCtrl, decoration: const InputDecoration(labelText: 'Gender')),
-              TextField(controller: statusCtrl, decoration: const InputDecoration(labelText: 'Growth status')),
+              TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Name')),
+              TextField(
+                  controller: ageCtrl,
+                  decoration: const InputDecoration(labelText: 'Age')),
+              TextField(
+                  controller: genderCtrl,
+                  decoration: const InputDecoration(labelText: 'Gender')),
+              TextField(
+                  controller: statusCtrl,
+                  decoration:
+                      const InputDecoration(labelText: 'Growth status')),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               setState(() {
@@ -595,16 +801,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Text('Edit parent account', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+        title: const Text('Edit parent account',
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: parentCtrl, decoration: const InputDecoration(labelText: 'Parent name')),
-            TextField(controller: typeCtrl, decoration: const InputDecoration(labelText: 'Account type')),
+            TextField(
+                controller: parentCtrl,
+                decoration: const InputDecoration(labelText: 'Parent name')),
+            TextField(
+                controller: typeCtrl,
+                decoration: const InputDecoration(labelText: 'Account type')),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               setState(() {
