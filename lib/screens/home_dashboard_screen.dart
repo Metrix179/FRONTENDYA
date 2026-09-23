@@ -1,8 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../widgets/card_swap_stack.dart';
 import 'ai_scan_screen.dart';
-import 'growth_tracking_screen.dart';
 import 'nutrition_plan_screen.dart';
 import 'profile_screen.dart';
 import 'role_selection_screen.dart';
@@ -41,71 +40,13 @@ class HomeDashboardScreenBody extends StatefulWidget {
   State<HomeDashboardScreenBody> createState() => _HomeDashboardScreenBodyState();
 }
 
-class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody>
-    with SingleTickerProviderStateMixin {
+class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
   int _currentCardIndex = 0;
   bool _isDarkMode = false;
-  double _dragDx = 0.0;
-  late AnimationController _counterController;
-  late Animation<double> _counterAnimation;
-  Timer? _autoRotateTimer;
 
   @override
   void initState() {
     super.initState();
-    _counterController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _counterAnimation = CurvedAnimation(
-      parent: _counterController,
-      curve: Curves.easeOutCubic,
-    );
-    _counterController.forward();
-    _startAutoRotation();
-  }
-
-  void _startAutoRotation() {
-    _autoRotateTimer?.cancel();
-    _autoRotateTimer = Timer.periodic(const Duration(milliseconds: 3800), (timer) {
-      if (mounted) {
-        _nextCard();
-      }
-    });
-  }
-
-  void _resetAutoRotation() {
-    _autoRotateTimer?.cancel();
-    _startAutoRotation();
-  }
-
-  @override
-  void dispose() {
-    _autoRotateTimer?.cancel();
-    _counterController.dispose();
-    super.dispose();
-  }
-
-  void _nextCard() {
-    _resetAutoRotation();
-    setState(() {
-      _currentCardIndex = (_currentCardIndex + 1) % 3;
-      _dragDx = 0.0;
-    });
-    if (_currentCardIndex == 0) {
-      _counterController.forward(from: 0.0);
-    }
-  }
-
-  void _prevCard() {
-    _resetAutoRotation();
-    setState(() {
-      _currentCardIndex = (_currentCardIndex - 1 + 3) % 3;
-      _dragDx = 0.0;
-    });
-    if (_currentCardIndex == 0) {
-      _counterController.forward(from: 0.0);
-    }
   }
 
   @override
@@ -265,227 +206,232 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody>
 
   Widget _buildRotatingCardStack() {
     return Container(
-      height: 180,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: GestureDetector(
-        onHorizontalDragUpdate: (details) {
-          setState(() => _dragDx += details.delta.dx);
-        },
-        onHorizontalDragEnd: (details) {
-          if (_dragDx < -40) {
-            _nextCard();
-          } else if (_dragDx > 40) {
-            _prevCard();
-          } else {
-            setState(() => _dragDx = 0.0);
-          }
-        },
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Card 2 (Back)
-            _buildDeckCard((_currentCardIndex + 2) % 3, 2),
-            // Card 1 (Mid)
-            _buildDeckCard((_currentCardIndex + 1) % 3, 1),
-            // Card 0 (Front)
-            _buildDeckCard(_currentCardIndex, 0),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDeckCard(int cardIndex, int offset) {
-    final isTop = offset == 0;
-    final isSecond = offset == 1;
-
-    final double baseRotation = isTop
-        ? (_dragDx * 0.001)
-        : (isSecond ? -0.05 : 0.05);
-    final double scale = isTop ? 1.0 : (isSecond ? 0.94 : 0.88);
-    final double yOffset = isTop ? 0.0 : (isSecond ? -10.0 : -18.0);
-    final double xOffset = isTop ? _dragDx : 0.0;
-
-    return AnimatedPositioned(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOutCubic,
-      top: 10 + yOffset,
-      left: xOffset,
-      right: -xOffset,
-      child: Transform.rotate(
-        angle: baseRotation,
-        child: Transform.scale(
-          scale: scale,
-          child: Container(
-            padding: const EdgeInsets.all(18),
+      height: 230,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      child: CardSwapStack(
+        currentIndex: _currentCardIndex,
+        onCardChanged: (index) => setState(() => _currentCardIndex = index),
+        cardWidth: 320,
+        cardHeight: 190,
+        cardDistance: 18,
+        verticalDistance: 12,
+        autoSwapDuration: const Duration(seconds: 4),
+        animDuration: const Duration(milliseconds: 850),
+        cards: [
+          Container(
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFE2EAE2)),
+              border: Border.all(color: const Color(0xFFE2E7E1), width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isTop ? 0.08 : 0.04),
-                  blurRadius: isTop ? 22 : 12,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
-            child: _buildCardContent(cardIndex),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardContent(int index) {
-    if (index == 0) {
-      return AnimatedBuilder(
-        animation: _counterAnimation,
-        builder: (context, child) {
-          final w = (14.2 * _counterAnimation.value).toStringAsFixed(1);
-          final h = (92.5 * _counterAnimation.value).toStringAsFixed(1);
-          final m = (14.5 * _counterAnimation.value).toStringAsFixed(1);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Text(
-                        'Current Vitals',
-                        style: TextStyle(
-                          fontSize: 16.5,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF1B3D2B),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 6),
-                      IconButton(
-                        icon: const Icon(Icons.sync_rounded, size: 16, color: Color(0xFF5A7263)),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: _nextCard,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'GROWTH STATUS',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                        color: Color(0xFF1B3D2B),
                       ),
-                    ],
-                  ),
-                  const Text('Updated 2 days ago', style: TextStyle(fontSize: 11, color: Color(0xFF5A7263))),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _metric('Weight', w, 'kg'),
-                  _metric('Height', h, 'cm'),
-                  _metric('MUAC', m, 'cm'),
-                ],
-              ),
-            ],
-          );
-        },
-      );
-    } else if (index == 1) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE6F4EA),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.assignment_turned_in_rounded, color: Color(0xFF0F3827)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Latest Assessment', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 2),
-                    Text('Analysis indicates healthy milestones.', style: TextStyle(fontSize: 11.5, color: Color(0xFF5A7263))),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => GrowthTrackingScreen(childName: widget.childName),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'View full report →',
+                const SizedBox(height: 12),
+                const Text(
+                  'Normal Growth',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF173124),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${widget.childName} remains in the healthy percentile for their age group according to WHO standards.',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: Color(0xFF5A625C),
+                  ),
+                ),
+                const Spacer(),
+                const Text(
+                  'View growth details →',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F3827),
+                    color: Color(0xFF173124),
                   ),
                 ),
-              ),
-              const Text('Passed', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF065F46))),
-            ],
+              ],
+            ),
           ),
-        ],
-      );
-    } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('✦ GROWTH STATUS', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF0F3827))),
-          const SizedBox(height: 4),
-          const Text('Normal Growth', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 2),
-          Text('${widget.childName} remains in the healthy percentile.', style: const TextStyle(fontSize: 11.5, color: Color(0xFF5A7263))),
-          const SizedBox(height: 10),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => GrowthTrackingScreen(childName: widget.childName),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAF8),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFD6DEC3), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
-              );
-            },
-            child: const Text(
-              'View growth details →',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0F3827),
-              ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2C5E3B),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'VITALS UPDATE',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                        color: Color(0xFF2C5E3B),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Healthy Weight & Height',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF2C5E3B),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Weight: 12.4 kg | Height: 88 cm. Updated 2 days ago.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: Color(0xFF5A625C),
+                  ),
+                ),
+                const Spacer(),
+                const Text(
+                  'View all vitals →',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2C5E3B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEF3EB),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFCBD8C7), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF173124),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'ASSESSMENT',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                        color: Color(0xFF173124),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Nutrition Milestones',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF173124),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Analysis indicates optimal protein intake and micro-nutrient balance.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: Color(0xFF5A625C),
+                  ),
+                ),
+                const Spacer(),
+                const Text(
+                  'Download report →',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF173124),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
-      );
-    }
-  }
-
-  Widget _metric(String l, String v, String u) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(l, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF5A7263))),
-      Row(
-        children: [
-          Text(v, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900, fontFamily: 'monospace')),
-          const SizedBox(width: 2),
-          Text(u, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold)),
-        ],
       ),
-    ],
-  );
+    );
+  }
 
   Widget _buildDotsIndicator() {
     return Row(
