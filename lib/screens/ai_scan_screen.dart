@@ -64,29 +64,49 @@ class _AiScanScreenState extends State<AiScanScreen>
     },
   ];
 
-  VideoPlayerController? _mascotVideoController;
-  int _currentLoadedMascotIndex = -1;
+  final Map<int, VideoPlayerController> _mascotVideoControllers = {};
+  int _selectedMascotIndex = 0;
+
+  String _resolveFullUrl(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    try {
+      final origin = Uri.base.origin;
+      if (origin.isNotEmpty && origin != 'null') {
+        final cleanPath = path.startsWith('/') ? path : '/$path';
+        return '$origin$cleanPath';
+      }
+    } catch (_) {}
+    return path;
+  }
 
   void _loadMascotVideo(int index) {
-    if (_currentLoadedMascotIndex == index) return;
-    _currentLoadedMascotIndex = index;
+    if (_mascotVideoControllers.containsKey(index)) {
+      final controller = _mascotVideoControllers[index];
+      if (controller != null && controller.value.isInitialized) {
+        controller.seekTo(Duration.zero);
+        controller.setVolume(0.0);
+        controller.play();
+      }
+      return;
+    }
+
     final primaryPath = _mascots[index]['video'] as String;
     final fallbackPath = _mascots[index]['fallback'] as String?;
 
-    _mascotVideoController?.dispose();
-    _mascotVideoController = null;
-
     void tryInitialize(String path) {
-      final Uri videoUri = Uri.parse(path);
+      final fullUrl = _resolveFullUrl(path);
+      final Uri videoUri = Uri.parse(fullUrl);
       final controller = VideoPlayerController.networkUrl(videoUri);
       controller.initialize().then((_) {
-        if (mounted && _currentLoadedMascotIndex == index) {
+        if (mounted) {
           setState(() {
-            _mascotVideoController = controller;
+            _mascotVideoControllers[index] = controller;
           });
           controller.setLooping(true);
           controller.setVolume(0.0);
-          controller.play();
+          if (index == _selectedMascotIndex) {
+            controller.play();
+          }
         }
       }).catchError((err) {
         debugPrint('Mascot video load error ($path): $err');
@@ -97,6 +117,18 @@ class _AiScanScreenState extends State<AiScanScreen>
     }
 
     tryInitialize(primaryPath);
+  }
+
+  void _selectMascot(int index) {
+    playChime();
+    // Pause current active video controller
+    _mascotVideoControllers[_selectedMascotIndex]?.pause();
+
+    setState(() {
+      _selectedMascotIndex = index;
+    });
+
+    _loadMascotVideo(index);
   }
 
 
@@ -193,7 +225,9 @@ class _AiScanScreenState extends State<AiScanScreen>
   @override
   void dispose() {
     _cameraController?.dispose();
-    _mascotVideoController?.dispose();
+    for (final controller in _mascotVideoControllers.values) {
+      controller.dispose();
+    }
     _laserController.dispose();
     _spinController.dispose();
     _counterController.dispose();
@@ -624,8 +658,8 @@ class _AiScanScreenState extends State<AiScanScreen>
   Widget _buildMascotView() {
     _loadMascotVideo(_selectedMascotIndex);
     final active = _mascots[_selectedMascotIndex];
-    final isVideoReady = _mascotVideoController != null &&
-        _mascotVideoController!.value.isInitialized;
+    final activeController = _mascotVideoControllers[_selectedMascotIndex];
+    final isVideoReady = activeController != null && activeController.value.isInitialized;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -664,14 +698,12 @@ class _AiScanScreenState extends State<AiScanScreen>
           ),
           const SizedBox(height: 14),
 
-          // 1. 3D Animated Card Swap Deck Stack (Selector Deck)
+          // 1. Animated Card Swap Deck Stack (Selector Deck)
           MascotCardSwapDeck(
             mascots: _mascots,
             selectedIndex: _selectedMascotIndex,
             onMascotSelected: (index) {
-              playChime();
-              setState(() => _selectedMascotIndex = index);
-              _loadMascotVideo(index);
+              _selectMascot(index);
             },
           ),
           const SizedBox(height: 18),
@@ -701,13 +733,13 @@ class _AiScanScreenState extends State<AiScanScreen>
                     FittedBox(
                       fit: BoxFit.cover,
                       child: SizedBox(
-                        width: _mascotVideoController!.value.size.width > 0
-                            ? _mascotVideoController!.value.size.width
+                        width: activeController.value.size.width > 0
+                            ? activeController.value.size.width
                             : 320,
-                        height: _mascotVideoController!.value.size.height > 0
-                            ? _mascotVideoController!.value.size.height
+                        height: activeController.value.size.height > 0
+                            ? activeController.value.size.height
                             : 240,
-                        child: VideoPlayer(_mascotVideoController!),
+                        child: VideoPlayer(activeController),
                       ),
                     )
                   else
@@ -1268,8 +1300,17 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   void _onCardTap(int mascotIndex) {
     widget.onMascotSelected(mascotIndex);
     if (!_animController.isAnimating) {
-      _startTimer();
-      _animController.forward();
+      if (_order[0] != mascotIndex) {
+        setState(() {
+          while (_order[0] != mascotIndex) {
+            final top = _order.removeAt(0);
+            _order.add(top);
+          }
+        });
+      } else {
+        _startTimer();
+        _animController.forward();
+      }
     }
   }
 
@@ -1315,20 +1356,17 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   }
 
   Widget _buildCard(int slotIndex, int mascotIndex, double t) {
-    // Spatial positioning (Matching Image 2 Reference Stack)
-    // Slot 0 (Front): (-18, 16), scale 1.0, width 285, height 280
-    // Slot 1 (Mid): (+4, -6), scale 0.94
-    // Slot 2 (Back): (+24, -26), scale 0.88
-    double xOffset = (1 - slotIndex) * 20.0 - 18.0;
-    double yOffset = (1 - slotIndex) * 20.0 - 4.0;
-    double scale = 1.0 - (slotIndex * 0.06);
+    // Spatial positioning (Straight card stack alignment)
+    double xOffset = (1 - slotIndex) * 16.0;
+    double yOffset = (1 - slotIndex) * 16.0;
+    double scale = 1.0 - (slotIndex * 0.05);
 
     if (slotIndex == 0 && _animController.isAnimating) {
       yOffset += t * 450.0; // Drop front card straight down out of view
     } else if (slotIndex > 0 && _animController.isAnimating) {
-      xOffset -= (20.0 * t); // Slide left-forward to next slot
-      yOffset += (20.0 * t);
-      scale += (0.06 * t);
+      xOffset -= (16.0 * t); // Slide left-forward to next slot
+      yOffset += (16.0 * t);
+      scale += (0.05 * t);
     }
 
     final mascot = widget.mascots[mascotIndex];
@@ -1340,10 +1378,8 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
       alignment: Alignment.center,
       child: Transform(
         transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // 3D Perspective
           ..translate(xOffset, yOffset)
-          ..scale(scale)
-          ..rotateZ(-2.5 * math.pi / 180), // Perspective skew angle matching Image 2
+          ..scale(scale),
         alignment: Alignment.center,
         child: GestureDetector(
           onTap: () => _onCardTap(mascotIndex),
