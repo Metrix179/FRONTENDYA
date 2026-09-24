@@ -1,8 +1,11 @@
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:video_player/video_player.dart';
 import '../theme/app_colors.dart';
 import '../widgets/interactive_eye_logo.dart';
+import '../utils/chime_synthesizer.dart';
 
 class AiScanScreen extends StatefulWidget {
   final String childName;
@@ -617,114 +620,61 @@ class _AiScanScreenState extends State<AiScanScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('INTERACTIVE MODE',
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF047857),
-                  letterSpacing: 1.0)),
-          const SizedBox(height: 2),
-          Text('Look here, ${widget.childName}!',
-              style: const TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF0C2417))),
-          const SizedBox(height: 2),
-          Text('Pick a mascot to keep ${widget.childName} focused.',
-              style: const TextStyle(fontSize: 13, color: Color(0xFF556D5E))),
-          const SizedBox(height: 16),
-
-          // Stacked cards
-          SizedBox(
-            height: 210,
-            child: Stack(
-              children: List.generate(_mascots.length, (i) {
-                final isSelected = i == _selectedMascotIndex;
-                final offset = (i - _selectedMascotIndex + _mascots.length) %
-                    _mascots.length;
-                final top = offset * 8.0;
-                final scale = 1.0 - offset * 0.05;
-
-                return Positioned(
-                  top: top,
-                  left: 10 + offset * 4.0,
-                  right: 10 + offset * 4.0,
-                  child: GestureDetector(
-                    onTap: () => setState(() => _selectedMascotIndex = i),
-                    child: Transform.scale(
-                      scale: scale,
-                      child: Container(
-                        height: 180,
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: isSelected
-                                ? const Color(0xFF10B981)
-                                : const Color(0xFFE2EAE2),
-                            width: isSelected ? 2 : 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4)),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(_mascots[i]['emoji'],
-                                style: const TextStyle(fontSize: 36)),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(_mascots[i]['name'],
-                                        style: const TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w900,
-                                            color: Color(0xFF0C2417))),
-                                    Text(_mascots[i]['subtitle'],
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            color: Color(0xFF556D5E))),
-                                  ],
-                                ),
-                                if (isSelected)
-                                  const CircleAvatar(
-                                    radius: 14,
-                                    backgroundColor: Color(0xFF059669),
-                                    child: Icon(Icons.check,
-                                        color: Colors.white, size: 16),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
+          const Text(
+            'INTERACTIVE MODE',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF047857),
+              letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 2),
+          Text(
+            'Look here, ${widget.childName}!',
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF0C2417),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Pick a mascot to keep ${widget.childName} focused.',
+            style: const TextStyle(fontSize: 13.5, color: Color(0xFF556D5E)),
+          ),
+          const SizedBox(height: 14),
 
-          // Black Playing Card with Video Player Integration
+          // 3D Isometric Card Swap Deck Stack
+          MascotCardSwapDeck(
+            mascots: _mascots,
+            selectedIndex: _selectedMascotIndex,
+            onMascotSelected: (index) {
+              playChime();
+              setState(() => _selectedMascotIndex = index);
+              _loadMascotVideo(index);
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Active Mascot Video Player Box
           Container(
-            height: isVideoReady ? 140 : 80,
+            height: 185,
+            width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFF0C140F),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF10B981), width: 1.5),
+              color: const Color(0xFF0A120E),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFF3FFF80), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF3FFF80).withOpacity(0.22),
+                  blurRadius: 18,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(26),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -740,55 +690,108 @@ class _AiScanScreenState extends State<AiScanScreen>
                             : 180,
                         child: VideoPlayer(_mascotVideoController!),
                       ),
+                    )
+                  else
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(active['emoji'],
+                              style: const TextStyle(fontSize: 42)),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Loading ${active['name']}...',
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 13),
+                          ),
+                        ],
+                      ),
                     ),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    color: isVideoReady ? Colors.black45 : Colors.transparent,
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.white12,
-                          child: Text(active['emoji'],
-                              style: const TextStyle(fontSize: 20)),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.black87, Colors.transparent],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
                             children: [
-                              Text(active['name'],
-                                  style: const TextStyle(
+                              CircleAvatar(
+                                radius: 19,
+                                backgroundColor: Colors.white24,
+                                child: Text(active['emoji'],
+                                    style: const TextStyle(fontSize: 20)),
+                              ),
+                              const SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    active['name'],
+                                    style: const TextStyle(
+                                      color: Colors.white,
                                       fontSize: 18,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white)),
-                              Text(
-                                  isVideoReady
-                                      ? 'Playing ${active['video']}'
-                                      : 'Tap cards above to switch animals',
-                                  style: const TextStyle(
-                                      fontSize: 11, color: Colors.white60)),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    active['subtitle'],
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 11.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2AE196).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color:
-                                    const Color(0xFF2AE196).withOpacity(0.4)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3FFF80).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: const Color(0xFF3FFF80).withOpacity(0.6),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF3FFF80),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'PLAYING',
+                                  style: TextStyle(
+                                    color: Color(0xFF3FFF80),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: const Text('PLAYING',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF2AE196))),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -823,6 +826,7 @@ class _AiScanScreenState extends State<AiScanScreen>
       ),
     );
   }
+
 
   // 3. RESULT VIEW (00:39 - 00:50)
   Widget _buildResultView() {
@@ -1104,3 +1108,222 @@ class _ChildSilhouettePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+class MascotCardSwapDeck extends StatefulWidget {
+  final List<Map<String, dynamic>> mascots;
+  final int selectedIndex;
+  final Function(int) onMascotSelected;
+
+  const MascotCardSwapDeck({
+    Key? key,
+    required this.mascots,
+    required this.selectedIndex,
+    required this.onMascotSelected,
+  }) : super(key: key);
+
+  @override
+  State<MascotCardSwapDeck> createState() => _MascotCardSwapDeckState();
+}
+
+class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
+    with SingleTickerProviderStateMixin {
+  late List<int> _order;
+  late AnimationController _animController;
+  Timer? _swapTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _order = List.generate(widget.mascots.length, (i) => i);
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    _animController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          setState(() {
+            final front = _order.removeAt(0);
+            _order.add(front);
+            _animController.reset();
+          });
+        }
+      }
+    });
+
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _swapTimer?.cancel();
+    _swapTimer = Timer.periodic(const Duration(milliseconds: 3600), (_) {
+      if (mounted && !_animController.isAnimating) {
+        _animController.forward();
+      }
+    });
+  }
+
+  void _onCardTap(int mascotIndex) {
+    widget.onMascotSelected(mascotIndex);
+    if (!_animController.isAnimating) {
+      _startTimer();
+      _animController.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _swapTimer?.cancel();
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 230,
+      width: double.infinity,
+      child: AnimatedBuilder(
+        animation: _animController,
+        builder: (context, child) {
+          final t = CurvedAnimation(
+            parent: _animController,
+            curve: Curves.elasticOut,
+          ).value;
+
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: List.generate(_order.length, (slotIndex) {
+              final mascotIndex = _order[slotIndex];
+              return _buildCard(slotIndex, mascotIndex, t);
+            }),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCard(int slotIndex, int mascotIndex, double t) {
+    double xOffset = slotIndex * 20.0;
+    double yOffset = -slotIndex * 18.0;
+    double scale = 1.0 - (slotIndex * 0.06);
+
+    // Slot-based color themes maintain smooth depth stack
+    final List<Color> slotBgColors = const [
+      Colors.white,
+      Color(0xFFDBE7DA),
+      Color(0xFFC3D5C1),
+    ];
+    final List<Color> slotBorderColors = const [
+      Color(0xFF3FFF80),
+      Color(0xFFB5C9B3),
+      Color(0xFF9EB79A),
+    ];
+
+    Color cardBg = slotBgColors[slotIndex.clamp(0, 2)];
+    Color cardBorder = slotBorderColors[slotIndex.clamp(0, 2)];
+
+    if (slotIndex == 0 && _animController.isAnimating) {
+      yOffset += t * 350.0; // Drop front card down
+    } else if (slotIndex > 0 && _animController.isAnimating) {
+      xOffset -= (20.0 * t);
+      yOffset += (18.0 * t);
+      scale += (0.06 * t);
+      Color targetBg = slotBgColors[(slotIndex - 1).clamp(0, 2)];
+      Color targetBorder = slotBorderColors[(slotIndex - 1).clamp(0, 2)];
+      cardBg = Color.lerp(cardBg, targetBg, t.clamp(0.0, 1.0))!;
+      cardBorder = Color.lerp(cardBorder, targetBorder, t.clamp(0.0, 1.0))!;
+    }
+
+    final mascot = widget.mascots[mascotIndex];
+    final isSelected = mascotIndex == widget.selectedIndex;
+
+    return Positioned(
+      child: Transform(
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // 3D Perspective
+          ..translate(xOffset, yOffset)
+          ..scale(scale)
+          ..rotateZ(2 * math.pi / 180), // Perspective skew
+        alignment: Alignment.center,
+        child: GestureDetector(
+          onTap: () => _onCardTap(mascotIndex),
+          child: Container(
+            width: 270,
+            height: 180,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isSelected ? const Color(0xFF10B981) : cardBorder,
+                width: isSelected ? 2.5 : 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      mascot['emoji'] as String,
+                      style: const TextStyle(fontSize: 38),
+                    ),
+                    if (isSelected)
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF10B981),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.check,
+                            color: Colors.white, size: 16),
+                      ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      mascot['name'] as String,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: slotIndex == 0
+                            ? const Color(0xFF0C2417)
+                            : const Color(0xFF1B3828),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      mascot['subtitle'] as String,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: slotIndex == 0
+                            ? const Color(0xFF556D5E)
+                            : const Color(0xFF3F5547),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
