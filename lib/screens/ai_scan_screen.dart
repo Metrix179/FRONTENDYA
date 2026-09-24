@@ -45,19 +45,22 @@ class _AiScanScreenState extends State<AiScanScreen>
       'name': 'Albatross',
       'subtitle': 'Graceful Ocean Soarer',
       'emoji': '🪶',
-      'video': '/videos/video1.mp4',
+      'video': '/videos/albatross.mp4',
+      'fallback': '/videos/video1.mp4',
     },
     {
       'name': 'Shark',
       'subtitle': 'Swift Friendly Swimmer',
       'emoji': '🦈',
-      'video': '/videos/video2.mp4',
+      'video': '/videos/shark.mp4',
+      'fallback': '/videos/video2.mp4',
     },
     {
       'name': 'Cheetah',
       'subtitle': 'Lightning Fast Runner',
       'emoji': '🐆',
-      'video': '/videos/video3.mp4',
+      'video': '/videos/cheetah.mp4',
+      'fallback': '/videos/video3.mp4',
     },
   ];
 
@@ -67,26 +70,35 @@ class _AiScanScreenState extends State<AiScanScreen>
   void _loadMascotVideo(int index) {
     if (_currentLoadedMascotIndex == index) return;
     _currentLoadedMascotIndex = index;
-    final videoPath = _mascots[index]['video'] as String;
+    final primaryPath = _mascots[index]['video'] as String;
+    final fallbackPath = _mascots[index]['fallback'] as String?;
 
     _mascotVideoController?.dispose();
     _mascotVideoController = null;
 
-    final Uri videoUri = Uri.parse(videoPath);
-    final controller = VideoPlayerController.networkUrl(videoUri);
-    controller.initialize().then((_) {
-      if (mounted && _currentLoadedMascotIndex == index) {
-        setState(() {
-          _mascotVideoController = controller;
-        });
-        controller.setLooping(true);
-        controller.setVolume(0.0);
-        controller.play();
-      }
-    }).catchError((err) {
-      debugPrint('Mascot video load error ($videoPath): $err');
-    });
+    void tryInitialize(String path) {
+      final Uri videoUri = Uri.parse(path);
+      final controller = VideoPlayerController.networkUrl(videoUri);
+      controller.initialize().then((_) {
+        if (mounted && _currentLoadedMascotIndex == index) {
+          setState(() {
+            _mascotVideoController = controller;
+          });
+          controller.setLooping(true);
+          controller.setVolume(0.0);
+          controller.play();
+        }
+      }).catchError((err) {
+        debugPrint('Mascot video load error ($path): $err');
+        if (fallbackPath != null && path != fallbackPath) {
+          tryInitialize(fallbackPath);
+        }
+      });
+    }
+
+    tryInitialize(primaryPath);
   }
+
 
   @override
   void initState() {
@@ -1182,7 +1194,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 230,
+      height: 235,
       width: double.infinity,
       child: AnimatedBuilder(
         animation: _animController,
@@ -1192,10 +1204,13 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
             curve: Curves.elasticOut,
           ).value;
 
+          // Render back slot (2) -> mid slot (1) -> front slot (0)
+          // so Front Slot (0) is ALWAYS drawn on top in Flutter's Stack!
           return Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.center,
-            children: List.generate(_order.length, (slotIndex) {
+            children: List.generate(_order.length, (i) {
+              final slotIndex = _order.length - 1 - i; // 2, 1, 0
               final mascotIndex = _order[slotIndex];
               return _buildCard(slotIndex, mascotIndex, t);
             }),
@@ -1206,30 +1221,34 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   }
 
   Widget _buildCard(int slotIndex, int mascotIndex, double t) {
-    double xOffset = slotIndex * 20.0;
-    double yOffset = -slotIndex * 18.0;
+    // Spatial positioning relative to center
+    // Slot 0 (Front): centered at (0, 12)
+    // Slot 1 (Mid): (-16, -4)
+    // Slot 2 (Back): (-32, -20)
+    double xOffset = (slotIndex - 1) * -16.0 - 16.0;
+    double yOffset = (1 - slotIndex) * 16.0 - 4.0;
     double scale = 1.0 - (slotIndex * 0.06);
 
-    // Slot-based color themes maintain smooth depth stack
+    // Slot-based color stack theme
     final List<Color> slotBgColors = const [
       Colors.white,
-      Color(0xFFDBE7DA),
-      Color(0xFFC3D5C1),
+      Color(0xFFDBE8DB),
+      Color(0xFFC5D8C5),
     ];
     final List<Color> slotBorderColors = const [
-      Color(0xFF3FFF80),
-      Color(0xFFB5C9B3),
-      Color(0xFF9EB79A),
+      Color(0xFFD4E5D4),
+      Color(0xFFC0D8C0),
+      Color(0xFFAEC8AE),
     ];
 
     Color cardBg = slotBgColors[slotIndex.clamp(0, 2)];
     Color cardBorder = slotBorderColors[slotIndex.clamp(0, 2)];
 
     if (slotIndex == 0 && _animController.isAnimating) {
-      yOffset += t * 350.0; // Drop front card down
+      yOffset += t * 380.0; // Drop front card straight down out of view
     } else if (slotIndex > 0 && _animController.isAnimating) {
-      xOffset -= (20.0 * t);
-      yOffset += (18.0 * t);
+      xOffset += (16.0 * t); // Slide forward to next slot
+      yOffset += (16.0 * t);
       scale += (0.06 * t);
       Color targetBg = slotBgColors[(slotIndex - 1).clamp(0, 2)];
       Color targetBorder = slotBorderColors[(slotIndex - 1).clamp(0, 2)];
@@ -1240,31 +1259,34 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
     final mascot = widget.mascots[mascotIndex];
     final isSelected = mascotIndex == widget.selectedIndex;
 
-    return Positioned(
+    return Align(
+      alignment: Alignment.center,
       child: Transform(
         transform: Matrix4.identity()
           ..setEntry(3, 2, 0.001) // 3D Perspective
           ..translate(xOffset, yOffset)
           ..scale(scale)
-          ..rotateZ(2 * math.pi / 180), // Perspective skew
+          ..rotateZ(2 * math.pi / 180), // Subtle isometric perspective skew
         alignment: Alignment.center,
         child: GestureDetector(
           onTap: () => _onCardTap(mascotIndex),
           child: Container(
-            width: 270,
+            width: 275,
             height: 180,
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(26),
               border: Border.all(
-                color: isSelected ? const Color(0xFF10B981) : cardBorder,
-                width: isSelected ? 2.5 : 1.5,
+                color: (isSelected && slotIndex == 0)
+                    ? const Color(0xFF10B981)
+                    : cardBorder,
+                width: (isSelected && slotIndex == 0) ? 2.5 : 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 14,
+                  color: Colors.black.withOpacity(slotIndex == 0 ? 0.08 : 0.03),
+                  blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
               ],
@@ -1278,11 +1300,11 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
                   children: [
                     Text(
                       mascot['emoji'] as String,
-                      style: const TextStyle(fontSize: 38),
+                      style: const TextStyle(fontSize: 40),
                     ),
-                    if (isSelected)
+                    if (isSelected && slotIndex == 0)
                       Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(5),
                         decoration: const BoxDecoration(
                           color: Color(0xFF10B981),
                           shape: BoxShape.circle,
@@ -1298,22 +1320,22 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
                     Text(
                       mascot['name'] as String,
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 23,
                         fontWeight: FontWeight.w900,
                         color: slotIndex == 0
                             ? const Color(0xFF0C2417)
-                            : const Color(0xFF1B3828),
+                            : const Color(0xFF263D2E),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       mascot['subtitle'] as String,
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: slotIndex == 0
                             ? const Color(0xFF556D5E)
-                            : const Color(0xFF3F5547),
+                            : const Color(0xFF486151),
                       ),
                     ),
                   ],
@@ -1326,4 +1348,5 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
     );
   }
 }
+
 
