@@ -657,7 +657,7 @@ class _AiScanScreenState extends State<AiScanScreen>
           ),
           const SizedBox(height: 14),
 
-          // 3D Isometric Card Swap Deck Stack
+          // 3D Isometric Card Swap Deck Stack (Laterally Inverted)
           MascotCardSwapDeck(
             mascots: _mascots,
             selectedIndex: _selectedMascotIndex,
@@ -669,18 +669,18 @@ class _AiScanScreenState extends State<AiScanScreen>
           ),
           const SizedBox(height: 16),
 
-          // Active Mascot Video Player Box
+          // Bigger, Smoother Mascot Video Player Screen
           Container(
-            height: 185,
+            height: 240,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFF0A120E),
+              color: const Color(0xFF09120D),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(color: const Color(0xFF3FFF80), width: 2),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF3FFF80).withOpacity(0.22),
-                  blurRadius: 18,
+                  color: const Color(0xFF3FFF80).withOpacity(0.24),
+                  blurRadius: 24,
                   spreadRadius: 2,
                 ),
               ],
@@ -699,7 +699,7 @@ class _AiScanScreenState extends State<AiScanScreen>
                             : 320,
                         height: _mascotVideoController!.value.size.height > 0
                             ? _mascotVideoController!.value.size.height
-                            : 180,
+                            : 240,
                         child: VideoPlayer(_mascotVideoController!),
                       ),
                     )
@@ -708,13 +708,28 @@ class _AiScanScreenState extends State<AiScanScreen>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(active['emoji'],
-                              style: const TextStyle(fontSize: 42)),
-                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3FFF80).withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(active['emoji'],
+                                style: const TextStyle(fontSize: 48)),
+                          ),
+                          const SizedBox(height: 12),
                           Text(
                             'Loading ${active['name']}...',
                             style: const TextStyle(
-                                color: Colors.white70, fontSize: 13),
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Initializing Mascot Stream',
+                            style:
+                                TextStyle(color: Colors.white60, fontSize: 12),
                           ),
                         ],
                       ),
@@ -725,7 +740,7 @@ class _AiScanScreenState extends State<AiScanScreen>
                     right: 0,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                          horizontal: 18, vertical: 14),
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           colors: [Colors.black87, Colors.transparent],
@@ -739,12 +754,12 @@ class _AiScanScreenState extends State<AiScanScreen>
                           Row(
                             children: [
                               CircleAvatar(
-                                radius: 19,
+                                radius: 21,
                                 backgroundColor: Colors.white24,
                                 child: Text(active['emoji'],
-                                    style: const TextStyle(fontSize: 20)),
+                                    style: const TextStyle(fontSize: 22)),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -753,7 +768,7 @@ class _AiScanScreenState extends State<AiScanScreen>
                                     active['name'],
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
+                                      fontSize: 19,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -761,7 +776,7 @@ class _AiScanScreenState extends State<AiScanScreen>
                                     active['subtitle'],
                                     style: const TextStyle(
                                       color: Colors.white70,
-                                      fontSize: 11.5,
+                                      fontSize: 12,
                                     ),
                                   ),
                                 ],
@@ -770,10 +785,10 @@ class _AiScanScreenState extends State<AiScanScreen>
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF3FFF80).withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(14),
+                              color: const Color(0xFF3FFF80).withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: const Color(0xFF3FFF80).withOpacity(0.6),
                               ),
@@ -782,8 +797,8 @@ class _AiScanScreenState extends State<AiScanScreen>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  width: 7,
-                                  height: 7,
+                                  width: 8,
+                                  height: 8,
                                   decoration: const BoxDecoration(
                                     color: Color(0xFF3FFF80),
                                     shape: BoxShape.circle,
@@ -794,7 +809,7 @@ class _AiScanScreenState extends State<AiScanScreen>
                                   'PLAYING',
                                   style: TextStyle(
                                     color: Color(0xFF3FFF80),
-                                    fontSize: 11,
+                                    fontSize: 11.5,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 1.2,
                                   ),
@@ -810,34 +825,63 @@ class _AiScanScreenState extends State<AiScanScreen>
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
-          ElevatedButton(
-            onPressed: () => setState(() => _state = _ScanState.scanner),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFF0C2417),
-              minimumSize: const Size.fromHeight(48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-                side: const BorderSide(color: Color(0xFFD8E3D8)),
+          // Primary Scan Button in Mascot Mode
+          ElevatedButton.icon(
+            onPressed: _triggerScan,
+            icon: _isScanning
+                ? RotationTransition(
+                    turns: _spinController,
+                    child: const Icon(Icons.sync, color: Colors.white, size: 20),
+                  )
+                : const Icon(Icons.camera_alt, size: 20, color: Colors.white),
+            label: Text(
+              _isScanning ? 'SCANNING BIOMETRICS...' : 'START BIOMETRIC SCAN',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.0,
+                color: Colors.white,
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.close, size: 16),
-                SizedBox(width: 6),
-                Text('Exit Distraction Mode',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              ],
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0F3827),
+              minimumSize: const Size.fromHeight(52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 4,
+              shadowColor: const Color(0xFF0F3827).withOpacity(0.4),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Secondary Exit Button
+          OutlinedButton.icon(
+            onPressed: () => setState(() => _state = _ScanState.scanner),
+            icon: const Icon(Icons.close, size: 16, color: Color(0xFF556D5E)),
+            label: const Text(
+              'Exit Distraction Mode',
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0C2417),
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(46),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              side: const BorderSide(color: Color(0xFFD8E3D8)),
             ),
           ),
         ],
       ),
     );
   }
+
 
 
   // 3. RESULT VIEW (00:39 - 00:50)
@@ -1193,39 +1237,41 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 235,
-      width: double.infinity,
-      child: AnimatedBuilder(
-        animation: _animController,
-        builder: (context, child) {
-          final t = CurvedAnimation(
-            parent: _animController,
-            curve: Curves.elasticOut,
-          ).value;
+    return ClipRect(
+      child: SizedBox(
+        height: 235,
+        width: double.infinity,
+        child: AnimatedBuilder(
+          animation: _animController,
+          builder: (context, child) {
+            final t = CurvedAnimation(
+              parent: _animController,
+              curve: Curves.elasticOut,
+            ).value;
 
-          // Render back slot (2) -> mid slot (1) -> front slot (0)
-          // so Front Slot (0) is ALWAYS drawn on top in Flutter's Stack!
-          return Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: List.generate(_order.length, (i) {
-              final slotIndex = _order.length - 1 - i; // 2, 1, 0
-              final mascotIndex = _order[slotIndex];
-              return _buildCard(slotIndex, mascotIndex, t);
-            }),
-          );
-        },
+            // Render back slot (2) -> mid slot (1) -> front slot (0)
+            // so Front Slot (0) is ALWAYS drawn on top in Flutter's Stack!
+            return Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: List.generate(_order.length, (i) {
+                final slotIndex = _order.length - 1 - i; // 2, 1, 0
+                final mascotIndex = _order[slotIndex];
+                return _buildCard(slotIndex, mascotIndex, t);
+              }),
+            );
+          },
+        ),
       ),
     );
   }
 
   Widget _buildCard(int slotIndex, int mascotIndex, double t) {
-    // Spatial positioning relative to center
-    // Slot 0 (Front): centered at (0, 12)
-    // Slot 1 (Mid): (-16, -4)
-    // Slot 2 (Back): (-32, -20)
-    double xOffset = (slotIndex - 1) * -16.0 - 16.0;
+    // Spatial positioning relative to center (Laterally Inverted: Stacking Rightwards)
+    // Slot 0 (Front): centered at (-10, 12)
+    // Slot 1 (Mid): (+6, -4)
+    // Slot 2 (Back): (+22, -20)
+    double xOffset = (1 - slotIndex) * 16.0 - 10.0;
     double yOffset = (1 - slotIndex) * 16.0 - 4.0;
     double scale = 1.0 - (slotIndex * 0.06);
 
@@ -1247,7 +1293,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
     if (slotIndex == 0 && _animController.isAnimating) {
       yOffset += t * 380.0; // Drop front card straight down out of view
     } else if (slotIndex > 0 && _animController.isAnimating) {
-      xOffset += (16.0 * t); // Slide forward to next slot
+      xOffset -= (16.0 * t); // Slide forward left to next slot
       yOffset += (16.0 * t);
       scale += (0.06 * t);
       Color targetBg = slotBgColors[(slotIndex - 1).clamp(0, 2)];
@@ -1266,7 +1312,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
           ..setEntry(3, 2, 0.001) // 3D Perspective
           ..translate(xOffset, yOffset)
           ..scale(scale)
-          ..rotateZ(2 * math.pi / 180), // Subtle isometric perspective skew
+          ..rotateZ(-2 * math.pi / 180), // Laterally inverted perspective skew angle
         alignment: Alignment.center,
         child: GestureDetector(
           onTap: () => _onCardTap(mascotIndex),
@@ -1348,5 +1394,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
     );
   }
 }
+
 
 
