@@ -65,7 +65,6 @@ class _AiScanScreenState extends State<AiScanScreen>
   ];
 
   final Map<int, VideoPlayerController> _mascotVideoControllers = {};
-  int _selectedMascotIndex = 0;
 
   String _resolveFullUrl(String path) {
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
