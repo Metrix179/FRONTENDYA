@@ -1249,7 +1249,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.black90,
+                            Colors.black87,
                             Colors.black45,
                             Colors.transparent,
                           ],
