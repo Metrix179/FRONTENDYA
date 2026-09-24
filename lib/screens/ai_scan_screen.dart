@@ -90,38 +90,33 @@ class _AiScanScreenState extends State<AiScanScreen>
     }
 
     final primaryPath = _mascots[index]['video'] as String;
-    final fallbackPath = _mascots[index]['fallback'] as String?;
+    final fullUrl = _resolveFullUrl(primaryPath);
 
-    void tryInitialize(String path) {
-      final fullUrl = _resolveFullUrl(path);
-      final Uri videoUri = Uri.parse(fullUrl);
-      final controller = VideoPlayerController.networkUrl(videoUri);
-      controller.initialize().then((_) {
-        if (mounted) {
-          setState(() {
-            _mascotVideoControllers[index] = controller;
-          });
-          controller.setLooping(true);
-          controller.setVolume(0.0);
-          if (index == _selectedMascotIndex) {
-            controller.play();
-          }
+    final Uri videoUri = Uri.parse(fullUrl);
+    final controller = VideoPlayerController.networkUrl(videoUri);
+    controller.initialize().then((_) {
+      if (mounted) {
+        setState(() {
+          _mascotVideoControllers[index] = controller;
+        });
+        controller.setLooping(true);
+        controller.setVolume(0.0);
+        if (index == _selectedMascotIndex) {
+          controller.play();
         }
-      }).catchError((err) {
-        debugPrint('Mascot video load error ($path): $err');
-        if (fallbackPath != null && path != fallbackPath) {
-          tryInitialize(fallbackPath);
-        }
-      });
-    }
-
-    tryInitialize(primaryPath);
+      }
+    }).catchError((err) {
+      debugPrint('Mascot video load error ($fullUrl): $err');
+    });
   }
 
   void _selectMascot(int index) {
     playChime();
-    // Pause current active video controller
-    _mascotVideoControllers[_selectedMascotIndex]?.pause();
+    _mascotVideoControllers.forEach((key, controller) {
+      if (key != index) {
+        controller.pause();
+      }
+    });
 
     setState(() {
       _selectedMascotIndex = index;
@@ -1250,6 +1245,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
             _order.add(front);
             _animController.reset();
           });
+          widget.onMascotSelected(_order[0]);
         }
       }
     });
@@ -1261,10 +1257,10 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   void _initDeckVideoControllers() {
     for (int i = 0; i < widget.mascots.length; i++) {
       final primaryPath = widget.mascots[i]['video'] as String;
-      final fallbackPath = widget.mascots[i]['fallback'] as String?;
 
       void loadPath(String path) {
-        final Uri videoUri = Uri.parse(path);
+        final fullUrl = widget.mascots[i]['video'] as String;
+        final Uri videoUri = Uri.parse(fullUrl);
         final controller = VideoPlayerController.networkUrl(videoUri);
         controller.initialize().then((_) {
           if (mounted) {
@@ -1277,9 +1273,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
           }
         }).catchError((err) {
           debugPrint('Deck video init error ($path): $err');
-          if (fallbackPath != null && path != fallbackPath) {
-            loadPath(fallbackPath);
-          }
         });
       }
 
@@ -1297,7 +1290,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   }
 
   void _onCardTap(int mascotIndex) {
-    widget.onMascotSelected(mascotIndex);
     if (!_animController.isAnimating) {
       if (_order[0] != mascotIndex) {
         setState(() {
@@ -1306,10 +1298,8 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
             _order.add(top);
           }
         });
-      } else {
-        _startTimer();
-        _animController.forward();
       }
+      widget.onMascotSelected(mascotIndex);
     }
   }
 
