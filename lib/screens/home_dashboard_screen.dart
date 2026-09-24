@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/card_swap_stack.dart';
+import '../widgets/interactive_eye_logo.dart';
 import 'ai_scan_screen.dart';
 import 'nutrition_plan_screen.dart';
 import 'profile_screen.dart';
@@ -37,7 +38,8 @@ class HomeDashboardScreenBody extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<HomeDashboardScreenBody> createState() => _HomeDashboardScreenBodyState();
+  State<HomeDashboardScreenBody> createState() =>
+      _HomeDashboardScreenBodyState();
 }
 
 class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
@@ -51,23 +53,26 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 110),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTopBar(),
-            const SizedBox(height: 8),
-            _buildGreeting(),
-            const SizedBox(height: 14),
-            _buildRotatingCardStack(),
-            const SizedBox(height: 12),
-            _buildDotsIndicator(),
-            const SizedBox(height: 18),
-            _buildActionButtons(),
-          ],
+    return AppThemeTransition(
+      isDark: _isDarkMode,
+      child: Container(
+        color: _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 110),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopBar(),
+              const SizedBox(height: 8),
+              _buildGreeting(),
+              const SizedBox(height: 14),
+              _buildRotatingCardStack(),
+              const SizedBox(height: 12),
+              _buildDotsIndicator(),
+              const SizedBox(height: 18),
+              _buildActionButtons(),
+            ],
+          ),
         ),
       ),
     );
@@ -88,10 +93,9 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                   color: AppColors.forestGreen.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.remove_red_eye_rounded,
+                child: const InteractiveEyeLogo(
+                  width: 23,
                   color: AppColors.forestGreen,
-                  size: 19,
                 ),
               ),
               const SizedBox(width: 8),
@@ -100,7 +104,9 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: _isDarkMode ? const Color(0xFFE8F2EA) : AppColors.textPrimary,
+                  color: _isDarkMode
+                      ? const Color(0xFFE8F2EA)
+                      : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -118,7 +124,9 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Align(
-                    alignment: _isDarkMode ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: _isDarkMode
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: Container(
                       width: 20,
                       height: 20,
@@ -127,7 +135,9 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _isDarkMode ? Icons.nightlight_round : Icons.wb_sunny_rounded,
+                        _isDarkMode
+                            ? Icons.nightlight_round
+                            : Icons.wb_sunny_rounded,
                         size: 12,
                         color: const Color(0xFF0C2417),
                       ),
@@ -148,7 +158,8 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                           childName: widget.childName,
                           onLogout: () {
                             Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const RoleSelectionScreen()),
                               (route) => false,
                             );
                           },
@@ -165,7 +176,8 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: const Icon(Icons.person_rounded, color: Colors.white, size: 17),
+                  child: const Icon(Icons.person_rounded,
+                      color: Colors.white, size: 17),
                 ),
               ),
             ],
@@ -186,7 +198,8 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
             style: TextStyle(
               fontSize: 23,
               fontWeight: FontWeight.w900,
-              color: _isDarkMode ? const Color(0xFFE8F2EA) : AppColors.textPrimary,
+              color:
+                  _isDarkMode ? const Color(0xFFE8F2EA) : AppColors.textPrimary,
               letterSpacing: -0.4,
             ),
           ),
@@ -196,7 +209,9 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: _isDarkMode ? const Color(0xFFA9C0B1) : AppColors.textSecondary,
+              color: _isDarkMode
+                  ? const Color(0xFFA9C0B1)
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -446,7 +461,8 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
             width: isActive ? 22 : 6,
             height: 6,
             decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF0C2417) : const Color(0xFFB8C7BC),
+              color:
+                  isActive ? const Color(0xFF0C2417) : const Color(0xFFB8C7BC),
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -477,14 +493,17 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
               backgroundColor: AppColors.forestGreen,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
                 Icon(Icons.qr_code_scanner_rounded, size: 20),
                 SizedBox(width: 8),
-                Text('Start New Scan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text('Start New Scan',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ],
             ),
           ),
@@ -497,7 +516,8 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => NutritionPlanScreen(childName: widget.childName),
+                    builder: (_) =>
+                        NutritionPlanScreen(childName: widget.childName),
                   ),
                 );
               }
@@ -506,14 +526,20 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
               backgroundColor: Colors.white,
               minimumSize: const Size.fromHeight(50),
               side: const BorderSide(color: Color(0xFFD3DED3)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                Icon(Icons.restaurant_menu_rounded, color: Color(0xFF0F3827), size: 20),
+                Icon(Icons.restaurant_menu_rounded,
+                    color: Color(0xFF0F3827), size: 20),
                 SizedBox(width: 8),
-                Text('Nutrition Plan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF0C2417))),
+                Text('Nutrition Plan',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Color(0xFF0C2417))),
               ],
             ),
           ),

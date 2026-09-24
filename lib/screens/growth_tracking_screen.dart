@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'profile_screen.dart';
+import '../widgets/interactive_eye_logo.dart';
 
 /// Standalone screen version of Growth Tracking (pushed via Navigator).
 /// Has its own Scaffold + back navigation, no bottom nav.
@@ -37,16 +38,62 @@ class _GrowthTrackingScreenState extends State<GrowthTrackingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
-      body: SafeArea(
+    return AppThemeTransition(
+      isDark: _isDarkMode,
+      child: Scaffold(
+        backgroundColor:
+            _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context, canPop: true),
+                const SizedBox(height: 6),
+                _buildTitleSection(),
+                const SizedBox(height: 10),
+                _buildSegmentControl(),
+                const SizedBox(height: 12),
+                if (_selectedSegment == 0) ...[
+                  _buildCurrentStatusCard(),
+                  const SizedBox(height: 10),
+                  _buildDualMetrics(),
+                  const SizedBox(height: 10),
+                  _buildMetricTabs(),
+                  const SizedBox(height: 10),
+                  _buildChartCard(),
+                  const SizedBox(height: 10),
+                  _buildLogMeasurementCard(),
+                ] else ...[
+                  _buildCalculatorView(),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GrowthTrackingBodyState extends State<GrowthTrackingScreenBody>
+    with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
+  @override
+  String get childName => widget.childName;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppThemeTransition(
+      isDark: _isDarkMode,
+      child: Container(
+        color: _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.only(bottom: 110),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context, canPop: true),
+              _buildHeader(context, canPop: false),
               const SizedBox(height: 6),
               _buildTitleSection(),
               const SizedBox(height: 10),
@@ -67,46 +114,6 @@ class _GrowthTrackingScreenState extends State<GrowthTrackingScreen>
               ],
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GrowthTrackingBodyState extends State<GrowthTrackingScreenBody>
-    with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
-  @override
-  String get childName => widget.childName;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEAF1E9),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 110),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context, canPop: false),
-            const SizedBox(height: 6),
-            _buildTitleSection(),
-            const SizedBox(height: 10),
-            _buildSegmentControl(),
-            const SizedBox(height: 12),
-            if (_selectedSegment == 0) ...[
-              _buildCurrentStatusCard(),
-              const SizedBox(height: 10),
-              _buildDualMetrics(),
-              const SizedBox(height: 10),
-              _buildMetricTabs(),
-              const SizedBox(height: 10),
-              _buildChartCard(),
-              const SizedBox(height: 10),
-              _buildLogMeasurementCard(),
-            ] else ...[
-              _buildCalculatorView(),
-            ],
-          ],
         ),
       ),
     );
@@ -243,7 +250,12 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget>
             children: [
               if (canPop)
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Color(0xFF0C2417)),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: _isDarkMode
+                        ? const Color(0xFFE8F2EA)
+                        : const Color(0xFF0C2417),
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
               Container(
@@ -253,19 +265,20 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget>
                   color: AppColors.forestGreen.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.remove_red_eye_rounded,
+                child: const InteractiveEyeLogo(
+                  width: 22,
                   color: AppColors.forestGreen,
-                  size: 18,
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Growth Tracking',
                 style: TextStyle(
                   fontSize: 17.5,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: _isDarkMode
+                      ? const Color(0xFFE8F2EA)
+                      : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -329,22 +342,25 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Growth Tracking',
             style: TextStyle(
               fontSize: 23,
               fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
+              color:
+                  _isDarkMode ? const Color(0xFFE8F2EA) : AppColors.textPrimary,
               letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             "Monitor ${childName}'s development milestones.",
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: _isDarkMode
+                  ? const Color(0xFFA9C0B1)
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -984,14 +1000,29 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget>
                         ),
                       ),
                       child: Column(
-                        children: const [
-                          CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Color(0xFFDCFCE7),
-                              child:
-                                  Text('👶', style: TextStyle(fontSize: 26))),
-                          SizedBox(height: 10),
-                          Text('Boy',
+                        children: [
+                          Container(
+                            width: 68,
+                            height: 68,
+                            decoration: BoxDecoration(
+                              color: _calcGender == 'Boy'
+                                  ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                                  : const Color(0xFFF3F4F6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: CustomPaint(
+                                size: const Size(36, 44),
+                                painter: _BoySilhouettePainter(
+                                  color: _calcGender == 'Boy'
+                                      ? const Color(0xFF0C2417)
+                                      : const Color(0xFF6B7280),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text('Boy',
                               style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w900,
@@ -1020,14 +1051,29 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget>
                         ),
                       ),
                       child: Column(
-                        children: const [
-                          CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Color(0xFFDCFCE7),
-                              child:
-                                  Text('🌸', style: TextStyle(fontSize: 26))),
-                          SizedBox(height: 10),
-                          Text('Girl',
+                        children: [
+                          Container(
+                            width: 68,
+                            height: 68,
+                            decoration: BoxDecoration(
+                              color: _calcGender == 'Girl'
+                                  ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                                  : const Color(0xFFF3F4F6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: CustomPaint(
+                                size: const Size(36, 44),
+                                painter: _GirlSilhouettePainter(
+                                  color: _calcGender == 'Girl'
+                                      ? const Color(0xFF0C2417)
+                                      : const Color(0xFF6B7280),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text('Girl',
                               style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w900,
@@ -2286,4 +2332,116 @@ class _MeasurementRulerPainter extends CustomPainter {
   bool shouldRepaint(covariant _MeasurementRulerPainter oldDelegate) =>
       oldDelegate.value != value ||
       oldDelegate.indicatorColor != indicatorColor;
+}
+
+class _BoySilhouettePainter extends CustomPainter {
+  final Color color;
+  const _BoySilhouettePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final scaleX = size.width / 32.0;
+    final scaleY = size.height / 40.0;
+    canvas.scale(scaleX, scaleY);
+
+    // Head
+    canvas.drawCircle(const Offset(16, 9), 7, paint);
+
+    // Hair tuft
+    final hairPath = Path()
+      ..moveTo(14, 2.5)
+      ..quadraticBezierTo(20, 1.5, 22, 6)
+      ..quadraticBezierTo(18, 5, 15, 3.5)
+      ..close();
+    canvas.drawPath(hairPath, paint);
+
+    // Body (Torso)
+    final torso = RRect.fromRectAndRadius(
+      const Rect.fromLTRB(9.5, 17, 22.5, 28),
+      const Radius.circular(4.5),
+    );
+    canvas.drawRRect(torso, paint);
+
+    // Legs
+    final leftLeg = RRect.fromRectAndRadius(const Rect.fromLTRB(10.5, 27, 15, 39), const Radius.circular(2.5));
+    final rightLeg = RRect.fromRectAndRadius(const Rect.fromLTRB(17, 27, 21.5, 39), const Radius.circular(2.5));
+    canvas.drawRRect(leftLeg, paint);
+    canvas.drawRRect(rightLeg, paint);
+
+    // Arms
+    final leftArm = RRect.fromRectAndRadius(const Rect.fromLTRB(6.5, 18, 9, 28), const Radius.circular(2.5));
+    final rightArm = RRect.fromRectAndRadius(const Rect.fromLTRB(23, 18, 25.5, 28), const Radius.circular(2.5));
+    canvas.drawRRect(leftArm, paint);
+    canvas.drawRRect(rightArm, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BoySilhouettePainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+class _GirlSilhouettePainter extends CustomPainter {
+  final Color color;
+  const _GirlSilhouettePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final scaleX = size.width / 32.0;
+    final scaleY = size.height / 40.0;
+    canvas.scale(scaleX, scaleY);
+
+    // Head
+    canvas.drawCircle(const Offset(16, 9), 6.5, paint);
+
+    // Left Pigtail
+    final leftPigtail = Path()
+      ..moveTo(10.5, 9)
+      ..cubicTo(5, 4.5, 3, 12, 8, 15)
+      ..cubicTo(9.5, 13.5, 10.5, 11, 10.5, 9)
+      ..close();
+    canvas.drawPath(leftPigtail, paint);
+
+    // Right Pigtail
+    final rightPigtail = Path()
+      ..moveTo(21.5, 9)
+      ..cubicTo(27, 4.5, 29, 12, 24, 15)
+      ..cubicTo(22.5, 13.5, 21.5, 11, 21.5, 9)
+      ..close();
+    canvas.drawPath(rightPigtail, paint);
+
+    // Dress (A-line silhouette)
+    final dressPath = Path()
+      ..moveTo(11.5, 17)
+      ..lineTo(20.5, 17)
+      ..lineTo(25, 29)
+      ..quadraticBezierTo(16, 30.5, 7, 29)
+      ..close();
+    canvas.drawPath(dressPath, paint);
+
+    // Legs
+    final leftLeg = RRect.fromRectAndRadius(const Rect.fromLTRB(11, 28, 14.5, 39), const Radius.circular(2.5));
+    final rightLeg = RRect.fromRectAndRadius(const Rect.fromLTRB(17.5, 28, 21, 39), const Radius.circular(2.5));
+    canvas.drawRRect(leftLeg, paint);
+    canvas.drawRRect(rightLeg, paint);
+
+    // Arms
+    final leftArm = RRect.fromRectAndRadius(const Rect.fromLTRB(6.5, 18, 9.5, 26), const Radius.circular(2.5));
+    final rightArm = RRect.fromRectAndRadius(const Rect.fromLTRB(22.5, 18, 25.5, 26), const Radius.circular(2.5));
+    canvas.drawRRect(leftArm, paint);
+    canvas.drawRRect(rightArm, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GirlSilhouettePainter oldDelegate) =>
+      oldDelegate.color != color;
 }

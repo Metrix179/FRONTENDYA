@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../theme/app_colors.dart';
+import '../widgets/interactive_eye_logo.dart';
 
 class AiScanScreen extends StatefulWidget {
   final String childName;
@@ -76,7 +77,8 @@ class _AiScanScreenState extends State<AiScanScreen>
     try {
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
-        throw CameraException('NoCamera', 'No camera was found on this device.');
+        throw CameraException(
+            'NoCamera', 'No camera was found on this device.');
       }
 
       final preferredCamera = cameras.firstWhere(
@@ -108,7 +110,8 @@ class _AiScanScreenState extends State<AiScanScreen>
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _cameraError = 'Camera access is unavailable. Check browser permissions.';
+        _cameraError =
+            'Camera access is unavailable. Check browser permissions.';
         _isCameraReady = false;
       });
     }
@@ -186,7 +189,10 @@ class _AiScanScreenState extends State<AiScanScreen>
                 icon: const Icon(Icons.arrow_back, color: Color(0xFF0C2417)),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              const Icon(Icons.remove_red_eye_outlined, color: Color(0xFF0C2417), size: 22),
+              const InteractiveEyeLogo(
+                width: 26,
+                color: Color(0xFF0C2417),
+              ),
               const SizedBox(width: 6),
               const Text(
                 'Ai Scan',
@@ -206,13 +212,15 @@ class _AiScanScreenState extends State<AiScanScreen>
                   color: const Color(0xFFDCE7DC),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.wb_sunny_outlined, size: 18, color: Color(0xFF0F3827)),
+                child: const Icon(Icons.wb_sunny_outlined,
+                    size: 18, color: Color(0xFF0F3827)),
               ),
               const SizedBox(width: 8),
               const CircleAvatar(
                 radius: 17,
                 backgroundColor: Color(0xFF0C2417),
-                child: Icon(Icons.person_outline, size: 18, color: Colors.white),
+                child:
+                    Icon(Icons.person_outline, size: 18, color: Colors.white),
               ),
             ],
           ),
@@ -246,12 +254,16 @@ class _AiScanScreenState extends State<AiScanScreen>
               children: [
                 const Text(
                   'AI Growth Scan',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF0C2417)),
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0C2417)),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Position ${widget.childName} inside the guide frame below.',
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF556D5E)),
+                  style:
+                      const TextStyle(fontSize: 13, color: Color(0xFF556D5E)),
                 ),
               ],
             ),
@@ -298,12 +310,16 @@ class _AiScanScreenState extends State<AiScanScreen>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.videocam_outlined, size: 34, color: Color(0xFF0F3827)),
+                              const Icon(Icons.videocam_outlined,
+                                  size: 34, color: Color(0xFF0F3827)),
                               const SizedBox(height: 10),
                               Text(
                                 _cameraError ?? 'Starting camera...',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF445B4E)),
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF445B4E)),
                               ),
                               if (_cameraError != null) ...[
                                 const SizedBox(height: 12),
@@ -351,7 +367,8 @@ class _AiScanScreenState extends State<AiScanScreen>
                               color: const Color(0xFF2AE196),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF2AE196).withOpacity(0.8),
+                                  color:
+                                      const Color(0xFF2AE196).withOpacity(0.8),
                                   blurRadius: 10,
                                   spreadRadius: 2,
                                 ),
@@ -371,7 +388,8 @@ class _AiScanScreenState extends State<AiScanScreen>
                   right: 0,
                   child: Center(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.92),
                         borderRadius: BorderRadius.circular(20),
@@ -380,11 +398,21 @@ class _AiScanScreenState extends State<AiScanScreen>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle)),
+                          Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                  color: Color(0xFF10B981),
+                                  shape: BoxShape.circle)),
                           const SizedBox(width: 6),
                           Text(
-                            _isScanning ? 'Scanning Biometrics...' : 'Aligning Posture',
-                            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF0C2417)),
+                            _isScanning
+                                ? 'Scanning Biometrics...'
+                                : 'Aligning Posture',
+                            style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0C2417)),
                           ),
                         ],
                       ),
@@ -403,9 +431,12 @@ class _AiScanScreenState extends State<AiScanScreen>
                 child: GestureDetector(
                   onTap: () => setState(() => _soundsEnabled = !_soundsEnabled),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: _soundsEnabled ? const Color(0xFFECF7ED) : Colors.white,
+                      color: _soundsEnabled
+                          ? const Color(0xFFECF7ED)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(color: const Color(0xFFD8E3D8)),
                     ),
@@ -415,12 +446,19 @@ class _AiScanScreenState extends State<AiScanScreen>
                         Row(
                           children: [
                             Icon(
-                              _soundsEnabled ? Icons.volume_up : Icons.volume_off,
+                              _soundsEnabled
+                                  ? Icons.volume_up
+                                  : Icons.volume_off,
                               size: 16,
-                              color: _soundsEnabled ? const Color(0xFF059669) : const Color(0xFF7D9585),
+                              color: _soundsEnabled
+                                  ? const Color(0xFF059669)
+                                  : const Color(0xFF7D9585),
                             ),
                             const SizedBox(width: 6),
-                            const Text('SOUNDS', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+                            const Text('SOUNDS',
+                                style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w800)),
                           ],
                         ),
                         Container(
@@ -428,14 +466,19 @@ class _AiScanScreenState extends State<AiScanScreen>
                           height: 20,
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
-                            color: _soundsEnabled ? const Color(0xFF0F3827) : const Color(0xFFCBD8CB),
+                            color: _soundsEnabled
+                                ? const Color(0xFF0F3827)
+                                : const Color(0xFFCBD8CB),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          alignment: _soundsEnabled ? Alignment.centerRight : Alignment.centerLeft,
+                          alignment: _soundsEnabled
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
                           child: Container(
                             width: 16,
                             height: 16,
-                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                            decoration: const BoxDecoration(
+                                color: Colors.white, shape: BoxShape.circle),
                           ),
                         ),
                       ],
@@ -448,7 +491,8 @@ class _AiScanScreenState extends State<AiScanScreen>
                 child: GestureDetector(
                   onTap: () => setState(() => _state = _ScanState.mascot),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
@@ -457,9 +501,14 @@ class _AiScanScreenState extends State<AiScanScreen>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Icon(Icons.auto_awesome, size: 16, color: Color(0xFF059669)),
+                        Icon(Icons.auto_awesome,
+                            size: 16, color: Color(0xFF059669)),
                         SizedBox(width: 6),
-                        Text('Mascot Mode', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF0C2417))),
+                        Text('Mascot Mode',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0C2417))),
                       ],
                     ),
                   ),
@@ -491,16 +540,21 @@ class _AiScanScreenState extends State<AiScanScreen>
                 child: _isScanning
                     ? RotationTransition(
                         turns: _spinController,
-                        child: const Icon(Icons.sync, color: Color(0xFF2AE196), size: 30),
+                        child: const Icon(Icons.sync,
+                            color: Color(0xFF2AE196), size: 30),
                       )
-                    : const Icon(Icons.camera_alt, color: Colors.white, size: 30),
+                    : const Icon(Icons.camera_alt,
+                        color: Colors.white, size: 30),
               ),
             ),
           ),
           const SizedBox(height: 6),
           Text(
             _isScanning ? 'Processing scan...' : 'Tap shutter to scan',
-            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF556D5E)),
+            style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF556D5E)),
           ),
         ],
       ),
@@ -515,11 +569,21 @@ class _AiScanScreenState extends State<AiScanScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('INTERACTIVE MODE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF047857), letterSpacing: 1.0)),
+          const Text('INTERACTIVE MODE',
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF047857),
+                  letterSpacing: 1.0)),
           const SizedBox(height: 2),
-          Text('Look here, ${widget.childName}!', style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+          Text('Look here, ${widget.childName}!',
+              style: const TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0C2417))),
           const SizedBox(height: 2),
-          Text('Pick a mascot to keep ${widget.childName} focused.', style: const TextStyle(fontSize: 13, color: Color(0xFF556D5E))),
+          Text('Pick a mascot to keep ${widget.childName} focused.',
+              style: const TextStyle(fontSize: 13, color: Color(0xFF556D5E))),
           const SizedBox(height: 16),
 
           // Stacked cards
@@ -528,7 +592,8 @@ class _AiScanScreenState extends State<AiScanScreen>
             child: Stack(
               children: List.generate(_mascots.length, (i) {
                 final isSelected = i == _selectedMascotIndex;
-                final offset = (i - _selectedMascotIndex + _mascots.length) % _mascots.length;
+                final offset = (i - _selectedMascotIndex + _mascots.length) %
+                    _mascots.length;
                 final top = offset * 8.0;
                 final scale = 1.0 - offset * 0.05;
 
@@ -547,33 +612,47 @@ class _AiScanScreenState extends State<AiScanScreen>
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(28),
                           border: Border.all(
-                            color: isSelected ? const Color(0xFF10B981) : const Color(0xFFE2EAE2),
+                            color: isSelected
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFE2EAE2),
                             width: isSelected ? 2 : 1,
                           ),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4)),
+                            BoxShadow(
+                                color: Colors.black.withOpacity(0.06),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4)),
                           ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(_mascots[i]['emoji'], style: const TextStyle(fontSize: 36)),
+                            Text(_mascots[i]['emoji'],
+                                style: const TextStyle(fontSize: 36)),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(_mascots[i]['name'], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
-                                    Text(_mascots[i]['subtitle'], style: const TextStyle(fontSize: 12, color: Color(0xFF556D5E))),
+                                    Text(_mascots[i]['name'],
+                                        style: const TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w900,
+                                            color: Color(0xFF0C2417))),
+                                    Text(_mascots[i]['subtitle'],
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Color(0xFF556D5E))),
                                   ],
                                 ),
                                 if (isSelected)
                                   const CircleAvatar(
                                     radius: 14,
                                     backgroundColor: Color(0xFF059669),
-                                    child: Icon(Icons.check, color: Colors.white, size: 16),
+                                    child: Icon(Icons.check,
+                                        color: Colors.white, size: 16),
                                   ),
                               ],
                             ),
@@ -600,26 +679,39 @@ class _AiScanScreenState extends State<AiScanScreen>
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.white12,
-                  child: Text(active['emoji'], style: const TextStyle(fontSize: 20)),
+                  child: Text(active['emoji'],
+                      style: const TextStyle(fontSize: 20)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(active['name'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
-                      const Text('Tap cards above to switch animals', style: TextStyle(fontSize: 11, color: Colors.white60)),
+                      Text(active['name'],
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white)),
+                      const Text('Tap cards above to switch animals',
+                          style:
+                              TextStyle(fontSize: 11, color: Colors.white60)),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2AE196).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF2AE196).withOpacity(0.4)),
+                    border: Border.all(
+                        color: const Color(0xFF2AE196).withOpacity(0.4)),
                   ),
-                  child: const Text('PLAYING', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF2AE196))),
+                  child: const Text('PLAYING',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF2AE196))),
                 ),
               ],
             ),
@@ -642,7 +734,9 @@ class _AiScanScreenState extends State<AiScanScreen>
               children: const [
                 Icon(Icons.close, size: 16),
                 SizedBox(width: 6),
-                Text('Exit Distraction Mode', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text('Exit Distraction Mode',
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -669,15 +763,20 @@ class _AiScanScreenState extends State<AiScanScreen>
               const CircleAvatar(
                 radius: 26,
                 backgroundColor: Color(0xFFDCFCE7),
-                child: Icon(Icons.check_circle_outline, color: Color(0xFF059669), size: 30),
+                child: Icon(Icons.check_circle_outline,
+                    color: Color(0xFF059669), size: 30),
               ),
               const SizedBox(height: 10),
               Text(
                 '${widget.childName} is growing normally',
-                style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w900, color: Color(0xFF0C2417)),
+                style: const TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0C2417)),
               ),
               const SizedBox(height: 2),
-              const Text('Scan completed today at 10:42 AM', style: TextStyle(fontSize: 12.5, color: Color(0xFF556D5E))),
+              const Text('Scan completed today at 10:42 AM',
+                  style: TextStyle(fontSize: 12.5, color: Color(0xFF556D5E))),
               const SizedBox(height: 16),
 
               // Measurements
@@ -691,36 +790,72 @@ class _AiScanScreenState extends State<AiScanScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('LATEST MEASUREMENTS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+                    const Text('LATEST MEASUREMENTS',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF556D5E),
+                            letterSpacing: 0.8)),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Weight', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF445B4E))),
-                        Text('$weight kg', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                        const Text('Weight',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF445B4E))),
+                        Text('$weight kg',
+                            style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF0C2417))),
                       ],
                     ),
                     const Divider(height: 20, color: Color(0xFFEDF2ED)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Height', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF445B4E))),
-                        Text('$height cm', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                        const Text('Height',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF445B4E))),
+                        Text('$height cm',
+                            style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF0C2417))),
                       ],
                     ),
                     const Divider(height: 20, color: Color(0xFFEDF2ED)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('MUAC', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF445B4E))),
+                        const Text('MUAC',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF445B4E))),
                         Row(
                           children: [
-                            Text('$muac cm', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0C2417))),
+                            Text('$muac cm',
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF0C2417))),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(12)),
-                              child: const Text('HEALTHY', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFF065F46))),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                  color: const Color(0xFFDCFCE7),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: const Text('HEALTHY',
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      color: Color(0xFF065F46))),
                             ),
                           ],
                         ),
@@ -742,11 +877,17 @@ class _AiScanScreenState extends State<AiScanScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('ANALYSIS INSIGHTS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF556D5E), letterSpacing: 0.8)),
+                    const Text('ANALYSIS INSIGHTS',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF556D5E),
+                            letterSpacing: 0.8)),
                     const SizedBox(height: 8),
                     Text(
                       '${widget.childName} is tracking perfectly on standard WHO percentile growth curves. Weight and height are well-proportioned, and upper-arm circumference reflects robust nutritional health.',
-                      style: const TextStyle(fontSize: 13, color: Color(0xFF2C3D32), height: 1.4),
+                      style: const TextStyle(
+                          fontSize: 13, color: Color(0xFF2C3D32), height: 1.4),
                     ),
                   ],
                 ),
@@ -759,14 +900,17 @@ class _AiScanScreenState extends State<AiScanScreen>
                   backgroundColor: AppColors.forestGreen,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Icon(Icons.restaurant_menu, size: 18),
                     SizedBox(width: 6),
-                    Text('View Nutrition Plan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5)),
+                    Text('View Nutrition Plan',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14.5)),
                   ],
                 ),
               ),
@@ -788,7 +932,9 @@ class _AiScanScreenState extends State<AiScanScreen>
                   children: const [
                     Icon(Icons.refresh, size: 18),
                     SizedBox(width: 6),
-                    Text('Scan Again', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5)),
+                    Text('Scan Again',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14.5)),
                   ],
                 ),
               ),
@@ -813,20 +959,28 @@ class _CornerBracketPainter extends CustomPainter {
     const pad = 16.0;
 
     // TL
-    canvas.drawLine(const Offset(pad, pad), const Offset(pad + arm, pad), paint);
-    canvas.drawLine(const Offset(pad, pad), const Offset(pad, pad + arm), paint);
+    canvas.drawLine(
+        const Offset(pad, pad), const Offset(pad + arm, pad), paint);
+    canvas.drawLine(
+        const Offset(pad, pad), const Offset(pad, pad + arm), paint);
 
     // TR
-    canvas.drawLine(Offset(size.width - pad, pad), Offset(size.width - pad - arm, pad), paint);
-    canvas.drawLine(Offset(size.width - pad, pad), Offset(size.width - pad, pad + arm), paint);
+    canvas.drawLine(Offset(size.width - pad, pad),
+        Offset(size.width - pad - arm, pad), paint);
+    canvas.drawLine(Offset(size.width - pad, pad),
+        Offset(size.width - pad, pad + arm), paint);
 
     // BL
-    canvas.drawLine(Offset(pad, size.height - pad), Offset(pad + arm, size.height - pad), paint);
-    canvas.drawLine(Offset(pad, size.height - pad), Offset(pad, size.height - pad - arm), paint);
+    canvas.drawLine(Offset(pad, size.height - pad),
+        Offset(pad + arm, size.height - pad), paint);
+    canvas.drawLine(Offset(pad, size.height - pad),
+        Offset(pad, size.height - pad - arm), paint);
 
     // BR
-    canvas.drawLine(Offset(size.width - pad, size.height - pad), Offset(size.width - pad - arm, size.height - pad), paint);
-    canvas.drawLine(Offset(size.width - pad, size.height - pad), Offset(size.width - pad, size.height - pad - arm), paint);
+    canvas.drawLine(Offset(size.width - pad, size.height - pad),
+        Offset(size.width - pad - arm, size.height - pad), paint);
+    canvas.drawLine(Offset(size.width - pad, size.height - pad),
+        Offset(size.width - pad, size.height - pad - arm), paint);
   }
 
   @override

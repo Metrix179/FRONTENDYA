@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+import '../widgets/interactive_eye_logo.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String childName;
@@ -52,21 +54,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _pageBackground,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-                child:
-                    _isHistoryView ? _buildHistoryView() : _buildProfileView(),
+    return AppThemeTransition(
+      isDark: _isDarkMode,
+      child: Scaffold(
+        backgroundColor: _pageBackground,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildTopBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                  child: _isHistoryView
+                      ? _buildHistoryView()
+                      : _buildProfileView(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -90,8 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
                 },
               ),
-              Icon(Icons.remove_red_eye_outlined,
-                  color: _primaryText, size: 22),
+              InteractiveEyeLogo(width: 26, color: _primaryText),
               const SizedBox(width: 6),
               Text(
                 _isHistoryView ? 'Child History' : 'Child Profile',

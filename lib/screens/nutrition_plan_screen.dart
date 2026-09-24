@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
+import '../widgets/interactive_eye_logo.dart';
 
 class NutritionPlanScreen extends StatefulWidget {
   final String childName;
@@ -152,26 +154,29 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _pageBackground,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 90),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitle(),
-                    const SizedBox(height: 10),
-                    _buildTimelineList(),
-                  ],
+    return AppThemeTransition(
+      isDark: _isDarkMode,
+      child: Scaffold(
+        backgroundColor: _pageBackground,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildTopBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 90),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle(),
+                      const SizedBox(height: 10),
+                      _buildTimelineList(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -189,8 +194,7 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
                 icon: Icon(Icons.arrow_back, color: _primaryText),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              Icon(Icons.remove_red_eye_outlined,
-                  color: _primaryText, size: 22),
+              InteractiveEyeLogo(width: 26, color: _primaryText),
               const SizedBox(width: 6),
               Text(
                 'Nutrition Plan',
