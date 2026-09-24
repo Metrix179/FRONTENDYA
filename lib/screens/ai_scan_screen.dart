@@ -622,6 +622,11 @@ class _AiScanScreenState extends State<AiScanScreen>
 
   // 2. MASCOT MODE (00:12 - 00:31)
   Widget _buildMascotView() {
+    _loadMascotVideo(_selectedMascotIndex);
+    final active = _mascots[_selectedMascotIndex];
+    final isVideoReady = _mascotVideoController != null &&
+        _mascotVideoController!.value.isInitialized;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
@@ -657,9 +662,9 @@ class _AiScanScreenState extends State<AiScanScreen>
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
-          // 3D Animated Full-Bleed Video Card Deck Stack (Matching Reference Design)
+          // 1. 3D Animated Card Swap Deck Stack (Selector Deck)
           MascotCardSwapDeck(
             mascots: _mascots,
             selectedIndex: _selectedMascotIndex,
@@ -669,9 +674,173 @@ class _AiScanScreenState extends State<AiScanScreen>
               _loadMascotVideo(index);
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
-          // Primary Scan Button in Mascot Mode
+          // 2. DEDICATED FULL VIDEO FRAME (Plays the Clicked Mascot Video!)
+          Container(
+            height: 240,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFF09120D),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFF3FFF80), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF3FFF80).withOpacity(0.24),
+                  blurRadius: 22,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(26),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (isVideoReady)
+                    FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: _mascotVideoController!.value.size.width > 0
+                            ? _mascotVideoController!.value.size.width
+                            : 320,
+                        height: _mascotVideoController!.value.size.height > 0
+                            ? _mascotVideoController!.value.size.height
+                            : 240,
+                        child: VideoPlayer(_mascotVideoController!),
+                      ),
+                    )
+                  else
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3FFF80).withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(active['emoji'],
+                                style: const TextStyle(fontSize: 48)),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Loading ${active['name']}...',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Initializing Mascot Stream',
+                            style:
+                                TextStyle(color: Colors.white60, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Bottom Info & Status Bar
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 14),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black87,
+                            Colors.black45,
+                            Colors.transparent,
+                          ],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 21,
+                                backgroundColor: Colors.white24,
+                                child: Text(active['emoji'],
+                                    style: const TextStyle(fontSize: 22)),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    active['name'],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 19,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    active['subtitle'],
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3FFF80).withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFF3FFF80).withOpacity(0.6),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF3FFF80),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'PLAYING',
+                                  style: TextStyle(
+                                    color: Color(0xFF3FFF80),
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // 3. ACTION BUTTONS
           ElevatedButton.icon(
             onPressed: _triggerScan,
             icon: _isScanning
