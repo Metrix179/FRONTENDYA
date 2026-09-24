@@ -1225,38 +1225,27 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
     with SingleTickerProviderStateMixin {
   late List<int> _order;
   late AnimationController _animController;
-  Timer? _swapTimer;
 
   @override
   void initState() {
     super.initState();
     _order = List.generate(widget.mascots.length, (i) => i);
+    // Align deck so top card matches selectedIndex on load
+    while (_order[0] != widget.selectedIndex) {
+      final top = _order.removeAt(0);
+      _order.add(top);
+    }
+
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 600),
     );
 
     _animController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         if (mounted) {
-          setState(() {
-            final front = _order.removeAt(0);
-            _order.add(front);
-            _animController.reset();
-          });
-          widget.onMascotSelected(_order[0]);
+          _animController.reset();
         }
-      }
-    });
-
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _swapTimer?.cancel();
-    _swapTimer = Timer.periodic(const Duration(milliseconds: 3600), (_) {
-      if (mounted && !_animController.isAnimating) {
-        _animController.forward();
       }
     });
   }
@@ -1270,6 +1259,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
             _order.add(top);
           }
         });
+        _animController.forward();
       }
       widget.onMascotSelected(mascotIndex);
     }
@@ -1277,7 +1267,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
 
   @override
   void dispose() {
-    _swapTimer?.cancel();
     _animController.dispose();
     super.dispose();
   }
