@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:video_player/video_player.dart';
 import '../theme/app_colors.dart';
 import '../widgets/interactive_eye_logo.dart';
 
@@ -37,10 +38,52 @@ class _AiScanScreenState extends State<AiScanScreen>
   bool _isCameraReady = false;
 
   final List<Map<String, dynamic>> _mascots = [
-    {'name': 'Albatross', 'subtitle': 'Graceful Ocean Soarer', 'emoji': '🪶'},
-    {'name': 'Shark', 'subtitle': 'Swift Friendly Swimmer', 'emoji': '🦈'},
-    {'name': 'Cheetah', 'subtitle': 'Lightning Fast Runner', 'emoji': '🐆'},
+    {
+      'name': 'Albatross',
+      'subtitle': 'Graceful Ocean Soarer',
+      'emoji': '🪶',
+      'video': '/videos/video1.mp4',
+    },
+    {
+      'name': 'Shark',
+      'subtitle': 'Swift Friendly Swimmer',
+      'emoji': '🦈',
+      'video': '/videos/video2.mp4',
+    },
+    {
+      'name': 'Cheetah',
+      'subtitle': 'Lightning Fast Runner',
+      'emoji': '🐆',
+      'video': '/videos/video3.mp4',
+    },
   ];
+
+  VideoPlayerController? _mascotVideoController;
+  int _currentLoadedMascotIndex = -1;
+
+  void _loadMascotVideo(int index) {
+    if (_currentLoadedMascotIndex == index) return;
+    _currentLoadedMascotIndex = index;
+    final videoPath = _mascots[index]['video'] as String;
+
+    _mascotVideoController?.dispose();
+    _mascotVideoController = null;
+
+    final Uri videoUri = Uri.parse(videoPath);
+    final controller = VideoPlayerController.networkUrl(videoUri);
+    controller.initialize().then((_) {
+      if (mounted && _currentLoadedMascotIndex == index) {
+        setState(() {
+          _mascotVideoController = controller;
+        });
+        controller.setLooping(true);
+        controller.setVolume(0.0);
+        controller.play();
+      }
+    }).catchError((err) {
+      debugPrint('Mascot video load error ($videoPath): $err');
+    });
+  }
 
   @override
   void initState() {
@@ -135,6 +178,7 @@ class _AiScanScreenState extends State<AiScanScreen>
   @override
   void dispose() {
     _cameraController?.dispose();
+    _mascotVideoController?.dispose();
     _laserController.dispose();
     _spinController.dispose();
     _counterController.dispose();
@@ -563,7 +607,11 @@ class _AiScanScreenState extends State<AiScanScreen>
 
   // 2. MASCOT MODE (00:12 - 00:31)
   Widget _buildMascotView() {
+    _loadMascotVideo(_selectedMascotIndex);
     final active = _mascots[_selectedMascotIndex];
+    final isVideoReady = _mascotVideoController != null &&
+        _mascotVideoController!.value.isInitialized;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
@@ -667,53 +715,84 @@ class _AiScanScreenState extends State<AiScanScreen>
           ),
           const SizedBox(height: 12),
 
-          // Black Playing Card
+          // Black Playing Card with Video Player Integration
           Container(
-            padding: const EdgeInsets.all(16),
+            height: isVideoReady ? 140 : 80,
             decoration: BoxDecoration(
               color: const Color(0xFF0C140F),
               borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFF10B981), width: 1.5),
             ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.white12,
-                  child: Text(active['emoji'],
-                      style: const TextStyle(fontSize: 20)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(active['name'],
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white)),
-                      const Text('Tap cards above to switch animals',
-                          style:
-                              TextStyle(fontSize: 11, color: Colors.white60)),
-                    ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (isVideoReady)
+                    FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: _mascotVideoController!.value.size.width > 0
+                            ? _mascotVideoController!.value.size.width
+                            : 320,
+                        height: _mascotVideoController!.value.size.height > 0
+                            ? _mascotVideoController!.value.size.height
+                            : 180,
+                        child: VideoPlayer(_mascotVideoController!),
+                      ),
+                    ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    color: isVideoReady ? Colors.black45 : Colors.transparent,
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.white12,
+                          child: Text(active['emoji'],
+                              style: const TextStyle(fontSize: 20)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(active['name'],
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white)),
+                              Text(
+                                  isVideoReady
+                                      ? 'Playing ${active['video']}'
+                                      : 'Tap cards above to switch animals',
+                                  style: const TextStyle(
+                                      fontSize: 11, color: Colors.white60)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2AE196).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color:
+                                    const Color(0xFF2AE196).withOpacity(0.4)),
+                          ),
+                          child: const Text('PLAYING',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF2AE196))),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2AE196).withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: const Color(0xFF2AE196).withOpacity(0.4)),
-                  ),
-                  child: const Text('PLAYING',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF2AE196))),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
