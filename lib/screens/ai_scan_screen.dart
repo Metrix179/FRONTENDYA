@@ -1226,7 +1226,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   late List<int> _order;
   late AnimationController _animController;
   Timer? _swapTimer;
-  final Map<int, VideoPlayerController> _controllers = {};
 
   @override
   void initState() {
@@ -1250,34 +1249,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
       }
     });
 
-    _initDeckVideoControllers();
     _startTimer();
-  }
-
-  void _initDeckVideoControllers() {
-    for (int i = 0; i < widget.mascots.length; i++) {
-      final primaryPath = widget.mascots[i]['video'] as String;
-
-      void loadPath(String path) {
-        final fullUrl = widget.mascots[i]['video'] as String;
-        final Uri videoUri = Uri.parse(fullUrl);
-        final controller = VideoPlayerController.networkUrl(videoUri);
-        controller.initialize().then((_) {
-          if (mounted) {
-            setState(() {
-              _controllers[i] = controller;
-            });
-            controller.setLooping(true);
-            controller.setVolume(0.0);
-            controller.play();
-          }
-        }).catchError((err) {
-          debugPrint('Deck video init error ($path): $err');
-        });
-      }
-
-      loadPath(primaryPath);
-    }
   }
 
   void _startTimer() {
@@ -1307,9 +1279,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   void dispose() {
     _swapTimer?.cancel();
     _animController.dispose();
-    for (final controller in _controllers.values) {
-      controller.dispose();
-    }
     super.dispose();
   }
 
@@ -1327,8 +1296,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
               curve: Curves.elasticOut,
             ).value;
 
-            // Render back slot (2) -> mid slot (1) -> front slot (0)
-            // so Front Slot (0) is ALWAYS drawn on top in Flutter's Stack!
             return Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
@@ -1360,8 +1327,15 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
 
     final mascot = widget.mascots[mascotIndex];
     final isSelected = mascotIndex == widget.selectedIndex;
-    final controller = _controllers[mascotIndex];
-    final isReady = controller != null && controller.value.isInitialized;
+
+    // Distinct theme gradients for each mascot image card
+    final List<List<Color>> mascotGradients = [
+      [const Color(0xFF0F3827), const Color(0xFF0369A1), const Color(0xFF0C4A6E)], // Albatross
+      [const Color(0xFF0F3827), const Color(0xFF0F766E), const Color(0xFF164E63)], // Shark
+      [const Color(0xFF0F3827), const Color(0xFFB45309), const Color(0xFF78350F)], // Cheetah
+    ];
+
+    final cardColors = mascotGradients[mascotIndex % mascotGradients.length];
 
     return Align(
       alignment: Alignment.center,
@@ -1376,7 +1350,6 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
             width: 285,
             height: 270,
             decoration: BoxDecoration(
-              color: Colors.black,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: (isSelected && slotIndex == 0)
@@ -1397,49 +1370,83 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Full-bleed live video preview inside the 3D card
-                  if (isReady)
-                    FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: controller.value.size.width > 0
-                            ? controller.value.size.width
-                            : 320,
-                        height: controller.value.size.height > 0
-                            ? controller.value.size.height
-                            : 270,
-                        child: VideoPlayer(controller),
-                      ),
-                    )
-                  else
-                    // Sleek gradient fallback poster with mascot emoji
-                    Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF0F3827),
-                            Color(0xFF1B4D36),
-                            Colors.black87,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          mascot['emoji'] as String,
-                          style: const TextStyle(fontSize: 64),
-                        ),
+                  // High-Definition Gradient Background
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: cardColors,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
                     ),
+                  ),
 
-                  // Dark bottom gradient overlay for typography (Matching Image 2)
+                  // Center Mascot Emoji Artwork Card Design
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.14),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white30,
+                              width: 1.5,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 16,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            mascot['emoji'] as String,
+                            style: const TextStyle(fontSize: 60),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3FFF80).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: const Color(0xFF3FFF80).withOpacity(0.6)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.play_circle_fill,
+                                  size: 13, color: Color(0xFF3FFF80)),
+                              SizedBox(width: 4),
+                              Text(
+                                'TAP TO PLAY VIDEO',
+                                style: TextStyle(
+                                  color: Color(0xFF3FFF80),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Bottom Gradient Typography Overlay
                   Positioned(
                     bottom: 0,
                     left: 0,
                     right: 0,
                     child: Container(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.all(16),
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -1458,7 +1465,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
                           Text(
                             mascot['name'] as String,
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: 22,
                               fontWeight: FontWeight.w900,
                               color: Colors.white,
                               letterSpacing: 0.5,
@@ -1469,7 +1476,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
                             Text(
                               mascot['subtitle'] as String,
                               style: const TextStyle(
-                                fontSize: 12.5,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white70,
                               ),
