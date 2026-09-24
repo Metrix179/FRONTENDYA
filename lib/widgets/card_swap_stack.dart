@@ -144,7 +144,7 @@ class _CardSwapStackState extends State<CardSwapStack>
 
     return SizedBox(
       width: widget.cardWidth + (widget.cardDistance * (total - 1)),
-      height: widget.cardHeight + (widget.verticalDistance * (total - 1)) + 100,
+      height: widget.cardHeight + (widget.verticalDistance * (total - 1)) + 16,
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, child) {

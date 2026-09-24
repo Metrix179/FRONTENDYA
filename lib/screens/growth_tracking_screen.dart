@@ -1,4 +1,7 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/vitals_provider.dart';
 import '../theme/app_theme.dart';
@@ -178,8 +181,13 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
   String _calcGender = 'Boy';
   int _calcAgeYears = 2;
   int _calcAgeMonths = 3;
+  late final TextEditingController _ageYearsController;
   double _calcWeight = 14.2;
   double _calcHeight = 92.5;
+  late final TextEditingController _weightController;
+  late final TextEditingController _heightController;
+  late final FocusNode _weightFocusNode;
+  late final FocusNode _heightFocusNode;
   double _currentWeight = 14.2;
   double _currentHeight = 92.5;
   String _currentPercentile = '75th percentile';
@@ -217,6 +225,13 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
   @override
   void initState() {
     super.initState();
+    _ageYearsController = TextEditingController(text: '$_calcAgeYears');
+    _weightController =
+        TextEditingController(text: _calcWeight.toStringAsFixed(1));
+    _heightController =
+        TextEditingController(text: _calcHeight.toStringAsFixed(1));
+    _weightFocusNode = FocusNode();
+    _heightFocusNode = FocusNode();
     _counterController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 750),
@@ -230,8 +245,24 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
 
   @override
   void dispose() {
+    _ageYearsController.dispose();
+    _weightController.dispose();
+    _heightController.dispose();
+    _weightFocusNode.dispose();
+    _heightFocusNode.dispose();
     _counterController.dispose();
     super.dispose();
+  }
+
+  void _updateCalcAgeYears(int newYears) {
+    final clamped = newYears.clamp(0, 25);
+    setState(() {
+      _calcAgeYears = clamped;
+      _ageYearsController.text = '$clamped';
+      _ageYearsController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _ageYearsController.text.length),
+      );
+    });
   }
 
   List<Map<String, dynamic>> get _currentMilestones {
@@ -1108,63 +1139,114 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
                 style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: const Color(0xFFE2EAE2)),
               ),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onVerticalDragUpdate: (details) {
-                      if (details.primaryDelta! < -5) {
-                        setState(() =>
-                            _calcAgeYears = (_calcAgeYears + 1).clamp(0, 25));
-                      } else if (details.primaryDelta! > 5) {
-                        setState(() =>
-                            _calcAgeYears = (_calcAgeYears - 1).clamp(0, 25));
+                  Listener(
+                    onPointerSignal: (pointerSignal) {
+                      if (pointerSignal is PointerScrollEvent) {
+                        if (pointerSignal.scrollDelta.dy > 0) {
+                          _updateCalcAgeYears(_calcAgeYears - 1);
+                        } else if (pointerSignal.scrollDelta.dy < 0) {
+                          _updateCalcAgeYears(_calcAgeYears + 1);
+                        }
                       }
                     },
-                    child: Column(
-                      children: [
-                        if (_calcAgeYears > 0)
-                          Text('${_calcAgeYears - 1}',
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Color(0xFFCBD5E1),
-                                  fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '$_calcAgeYears',
-                              style: TextStyle(
-                                fontSize: 46,
-                                fontWeight: FontWeight.w900,
-                                color: isAgeValid
-                                    ? const Color(0xFF0C2417)
-                                    : const Color(0xFFEF4444),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onVerticalDragUpdate: (details) {
+                        if (details.primaryDelta! < -5) {
+                          _updateCalcAgeYears(_calcAgeYears + 1);
+                        } else if (details.primaryDelta! > 5) {
+                          _updateCalcAgeYears(_calcAgeYears - 1);
+                        }
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (_calcAgeYears > 0)
+                            GestureDetector(
+                              onTap: () =>
+                                  _updateCalcAgeYears(_calcAgeYears - 1),
+                              child: Text('${_calcAgeYears - 1}',
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      color: Color(0xFFCBD5E1),
+                                      fontWeight: FontWeight.w600)),
+                            )
+                          else
+                            const SizedBox(height: 22),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IntrinsicWidth(
+                                child: TextField(
+                                  controller: _ageYearsController,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(2),
+                                  ],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 52,
+                                    fontWeight: FontWeight.w900,
+                                    color: isAgeValid
+                                        ? const Color(0xFF0C2417)
+                                        : const Color(0xFFEF4444),
+                                  ),
+                                  cursorColor: isAgeValid
+                                      ? const Color(0xFF0C2417)
+                                      : const Color(0xFFEF4444),
+                                  cursorWidth: 3.0,
+                                  cursorHeight: 42.0,
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                  onChanged: (val) {
+                                    final parsed = int.tryParse(val);
+                                    if (parsed != null) {
+                                      setState(() {
+                                        _calcAgeYears = parsed.clamp(0, 25);
+                                      });
+                                    } else if (val.isEmpty) {
+                                      setState(() {
+                                        _calcAgeYears = 0;
+                                      });
+                                    }
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            Container(
-                              width: 3,
-                              height: 36,
-                              color: isAgeValid
-                                  ? const Color(0xFF0C2417)
-                                  : const Color(0xFFEF4444),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text('${_calcAgeYears + 1}',
-                            style: const TextStyle(
-                                fontSize: 18,
-                                color: Color(0xFFCBD5E1),
-                                fontWeight: FontWeight.w600)),
-                      ],
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () =>
+                                _updateCalcAgeYears(_calcAgeYears + 1),
+                            child: Text('${_calcAgeYears + 1}',
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Color(0xFFCBD5E1),
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (!isAgeValid)
@@ -1232,51 +1314,148 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
                     fontWeight: FontWeight.w900,
                     color: Color(0xFF0C2417))),
             const SizedBox(height: 4),
-            const Text('Drag the scale to set the latest measured weight.',
+            const Text('Move the dial to set the latest measured weight.',
                 style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                     color: isWeightValid
                         ? const Color(0xFFE2EAE2)
-                        : const Color(0xFFEF4444).withOpacity(0.4)),
+                        : const Color(0xFFEF4444).withValues(alpha: 0.4)),
               ),
               child: Column(
                 children: [
-                  Text(
-                    _calcWeight.toStringAsFixed(1),
-                    style: TextStyle(
-                      fontSize: 52,
-                      fontWeight: FontWeight.w900,
-                      color: isWeightValid
-                          ? const Color(0xFF0C2417)
-                          : const Color(0xFFEF4444),
-                      fontFamily: 'monospace',
-                      letterSpacing: -1,
+                  // Arch Dial Gauge Widget
+                  Center(
+                    child: Listener(
+                      onPointerSignal: (pointerSignal) {
+                        if (pointerSignal is PointerScrollEvent) {
+                          final delta = pointerSignal.scrollDelta.dy / 10.0;
+                          final next =
+                              (_calcWeight + delta).clamp(2.0, 80.0);
+                          setState(() {
+                            _calcWeight =
+                                double.parse(next.toStringAsFixed(1));
+                            if (!_weightFocusNode.hasFocus) {
+                              _weightController.text =
+                                  _calcWeight.toStringAsFixed(1);
+                            }
+                          });
+                        }
+                      },
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onHorizontalDragUpdate: (details) {
+                          final delta = details.primaryDelta! / 5.0;
+                          final next =
+                              (_calcWeight + delta).clamp(2.0, 80.0);
+                          setState(() {
+                            _calcWeight =
+                                double.parse(next.toStringAsFixed(1));
+                            if (!_weightFocusNode.hasFocus) {
+                              _weightController.text =
+                                  _calcWeight.toStringAsFixed(1);
+                            }
+                          });
+                        },
+                        child: SizedBox(
+                          width: 280,
+                          height: 220,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              CustomPaint(
+                                size: const Size(280, 220),
+                                painter: _WeightDialPainter(
+                                  value: _calcWeight,
+                                  activeColor: isWeightValid
+                                      ? const Color(0xFF86BF15)
+                                      : const Color(0xFFEF4444),
+                                ),
+                              ),
+                              Positioned(
+                                top: 50,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IntrinsicWidth(
+                                          child: TextField(
+                                            controller: _weightController,
+                                            focusNode: _weightFocusNode,
+                                            keyboardType: const TextInputType
+                                                .numberWithOptions(
+                                                decimal: true),
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                  RegExp(r'^\d*\.?\d{0,1}')),
+                                            ],
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 48,
+                                              fontWeight: FontWeight.w900,
+                                              color: isWeightValid
+                                                  ? const Color(0xFF0C2417)
+                                                  : const Color(0xFFEF4444),
+                                              fontFamily: 'monospace',
+                                              letterSpacing: -1,
+                                            ),
+                                            cursorColor: isWeightValid
+                                                ? const Color(0xFF0C2417)
+                                                : const Color(0xFFEF4444),
+                                            cursorWidth: 3.0,
+                                            cursorHeight: 40.0,
+                                            decoration: const InputDecoration(
+                                              border: InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                              enabledBorder: InputBorder.none,
+                                              errorBorder: InputBorder.none,
+                                              disabledBorder: InputBorder.none,
+                                              isDense: true,
+                                              contentPadding: EdgeInsets.zero,
+                                            ),
+                                            onChanged: (val) {
+                                              final parsed =
+                                                  double.tryParse(val);
+                                              if (parsed != null) {
+                                                setState(() {
+                                                  _calcWeight =
+                                                      parsed.clamp(2.0, 80.0);
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'kg',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: isWeightValid
+                                            ? const Color(0xFF556D5E)
+                                            : const Color(0xFFEF4444),
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'kg',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: isWeightValid
-                          ? const Color(0xFF556D5E)
-                          : const Color(0xFFEF4444),
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _WeightPickerWidget(
-                    value: _calcWeight,
-                    minValue: 2.0,
-                    maxValue: 80.0,
-                    isValid: isWeightValid,
-                    onChanged: (val) => setState(() => _calcWeight = val),
                   ),
                   if (!isWeightValid)
                     const Padding(
@@ -1290,7 +1469,7 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
                 ],
               ),
             ),
-          ]
+          ]     ]
 
           // STEP 4: Enter Height (Measurement Ruler)
           else if (_calcStep == 4) ...[
@@ -1307,51 +1486,136 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
                     fontWeight: FontWeight.w900,
                     color: Color(0xFF0C2417))),
             const SizedBox(height: 4),
-            const Text('Drag the scale to set the latest measured height.',
+            const Text('Move the ruler to set the latest measured height.',
                 style: TextStyle(fontSize: 13, color: Color(0xFF5A7263))),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                     color: isHeightValid
-                        ? const Color(0xFFBBF7D0)
-                        : const Color(0xFFEF4444).withOpacity(0.4)),
+                        ? const Color(0xFFE2EAE2)
+                        : const Color(0xFFEF4444).withValues(alpha: 0.4)),
               ),
               child: Column(
                 children: [
-                  Text(
-                    _calcHeight.toStringAsFixed(1),
-                    style: TextStyle(
-                      fontSize: 52,
-                      fontWeight: FontWeight.w900,
-                      color: isHeightValid
-                          ? const Color(0xFF0C2417)
-                          : const Color(0xFFEF4444),
-                      fontFamily: 'monospace',
-                      letterSpacing: -1,
-                    ),
-                  ),
-                  Text(
-                    'cm',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: isHeightValid
-                          ? const Color(0xFF556D5E)
-                          : const Color(0xFFEF4444),
-                      letterSpacing: 1,
+                  // Central Vertical Ruler Box
+                  Center(
+                    child: Container(
+                      width: 210,
+                      height: 270,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEEF6EC),
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: isHeightValid
+                              ? const Color(0xFFD3E4D1)
+                              : const Color(0xFFEF4444).withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: Listener(
+                          onPointerSignal: (pointerSignal) {
+                            if (pointerSignal is PointerScrollEvent) {
+                              final delta = pointerSignal.scrollDelta.dy / 12.0;
+                              final next =
+                                  (_calcHeight + delta).clamp(45.0, 190.0);
+                              setState(() {
+                                _calcHeight =
+                                    double.parse(next.toStringAsFixed(1));
+                                if (!_heightFocusNode.hasFocus) {
+                                  _heightController.text =
+                                      _calcHeight.toStringAsFixed(1);
+                                }
+                              });
+                            }
+                          },
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onVerticalDragUpdate: (details) {
+                              final delta = -details.primaryDelta! / 8.0;
+                              final next =
+                                  (_calcHeight + delta).clamp(45.0, 190.0);
+                              setState(() {
+                                _calcHeight =
+                                    double.parse(next.toStringAsFixed(1));
+                                if (!_heightFocusNode.hasFocus) {
+                                  _heightController.text =
+                                      _calcHeight.toStringAsFixed(1);
+                                }
+                              });
+                            },
+                            child: CustomPaint(
+                              painter: _HeightRulerPainter(
+                                value: _calcHeight,
+                                minValue: 45.0,
+                                maxValue: 190.0,
+                                activeColor: isHeightValid
+                                    ? const Color(0xFF86BF15)
+                                    : const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _HeightPickerWidget(
-                    value: _calcHeight,
-                    minValue: 45.0,
-                    maxValue: 190.0,
-                    isValid: isHeightValid,
-                    onChanged: (val) => setState(() => _calcHeight = val),
+
+                  // Large Editable Number Input directly below ruler
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IntrinsicWidth(
+                        child: TextField(
+                          controller: _heightController,
+                          focusNode: _heightFocusNode,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d*\.?\d{0,1}')),
+                          ],
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 52,
+                            fontWeight: FontWeight.w900,
+                            color: isHeightValid
+                                ? const Color(0xFF0C2417)
+                                : const Color(0xFFEF4444),
+                            fontFamily: 'monospace',
+                            letterSpacing: -1,
+                          ),
+                          cursorColor: isHeightValid
+                              ? const Color(0xFF0C2417)
+                              : const Color(0xFFEF4444),
+                          cursorWidth: 3.0,
+                          cursorHeight: 44.0,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          onChanged: (val) {
+                            final parsed = double.tryParse(val);
+                            if (parsed != null) {
+                              setState(() {
+                                _calcHeight = parsed.clamp(45.0, 190.0);
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                   if (!isHeightValid)
                     const Padding(
@@ -1613,520 +1877,168 @@ class _GrowthCurvePainter extends CustomPainter {
 // Measurement Ruler Widget (Weight & Height input scale)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _WeightPickerWidget extends StatefulWidget {
+class _WeightDialPainter extends CustomPainter {
   final double value;
-  final double minValue;
-  final double maxValue;
-  final bool isValid;
-  final ValueChanged<double> onChanged;
+  final Color activeColor;
 
-  const _WeightPickerWidget({
-    Key? key,
+  _WeightDialPainter({
     required this.value,
-    required this.minValue,
-    required this.maxValue,
-    required this.isValid,
-    required this.onChanged,
-  }) : super(key: key);
-
-  @override
-  State<_WeightPickerWidget> createState() => _WeightPickerWidgetState();
-}
-
-class _WeightPickerWidgetState extends State<_WeightPickerWidget> {
-  static const double _pixelsPerKg = 7.0;
-  static const double _kgPerLb = 0.45359237;
-  bool _showPounds = false;
-
-  double get _displayValue =>
-      _showPounds ? widget.value / _kgPerLb : widget.value;
-
-  double _snapKg(double value) {
-    final clamped = value.clamp(widget.minValue, widget.maxValue);
-    return double.parse(clamped.toStringAsFixed(1));
-  }
-
-  void _changeByPixels(double delta) {
-    widget.onChanged(_snapKg(widget.value + delta / _pixelsPerKg));
-  }
-
-  void _setFromPosition(double localX, double width) {
-    final ratio = (localX / width).clamp(0.0, 1.0);
-    final next = widget.minValue + ratio * (widget.maxValue - widget.minValue);
-    widget.onChanged(_snapKg(next));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final accent =
-        widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
-    final track =
-        widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
-    final ratio =
-        ((widget.value - widget.minValue) / (widget.maxValue - widget.minValue))
-            .clamp(0.0, 1.0);
-
-    return Container(
-      height: 220,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FBF8),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: track),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'WEIGHT SCALE',
-                style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF556D5E),
-                    letterSpacing: 1),
-              ),
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    color: const Color(0xFFE3ECE4),
-                    borderRadius: BorderRadius.circular(20)),
-                child: Row(
-                  children: [
-                    _unitButton('KG', !_showPounds,
-                        () => setState(() => _showPounds = false)),
-                    _unitButton('LB', _showPounds,
-                        () => setState(() => _showPounds = true)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${_showPounds ? _displayValue.round() : _displayValue.toStringAsFixed(1)} ${_showPounds ? 'lb' : 'kg'}',
-            style: TextStyle(
-                fontSize: 42,
-                height: 1.05,
-                fontWeight: FontWeight.w900,
-                color: accent,
-                fontFamily: 'monospace'),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final rulerWidth = constraints.maxWidth;
-                final thumbLeft = ratio * (rulerWidth - 20);
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragUpdate: (details) =>
-                      _changeByPixels(details.primaryDelta ?? 0),
-                  onTapDown: (details) =>
-                      _setFromPosition(details.localPosition.dx, rulerWidth),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Positioned.fill(
-                        child: CustomPaint(
-                          painter: _WeightPickerPainter(
-                            value: widget.value,
-                            minValue: widget.minValue,
-                            maxValue: widget.maxValue,
-                            accent: accent,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: rulerWidth / 2 - 1.5,
-                        top: 0,
-                        bottom: 26,
-                        child: IgnorePointer(
-                            child: Container(
-                                width: 3,
-                                decoration: BoxDecoration(
-                                    color: accent,
-                                    borderRadius: BorderRadius.circular(2)))),
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 8,
-                        child: Container(height: 2, color: track),
-                      ),
-                      Positioned(
-                        left: thumbLeft,
-                        bottom: -1,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onHorizontalDragUpdate: (details) {
-                            final nextRatio = ((thumbLeft + details.delta.dx) /
-                                    (rulerWidth - 20))
-                                .clamp(0.0, 1.0);
-                            widget.onChanged(_snapKg(widget.minValue +
-                                nextRatio *
-                                    (widget.maxValue - widget.minValue)));
-                          },
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: accent, width: 2.5),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: accent.withOpacity(0.25),
-                                    blurRadius: 8)
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          Text('Drag the scale or thumb to adjust',
-              style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
-        ],
-      ),
-    );
-  }
-
-  Widget _unitButton(String label, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-            color: selected ? const Color(0xFF0F3827) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16)),
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: selected ? Colors.white : const Color(0xFF667D6F))),
-      ),
-    );
-  }
-}
-
-class _WeightPickerPainter extends CustomPainter {
-  final double value;
-  final double minValue;
-  final double maxValue;
-  final Color accent;
-
-  _WeightPickerPainter(
-      {required this.value,
-      required this.minValue,
-      required this.maxValue,
-      required this.accent});
+    required this.activeColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final range = maxValue - minValue;
-    final pixelsPerUnit = size.width / range;
-    final minorPaint = Paint()
-      ..color = const Color(0xFFB3C4B6)
-      ..strokeWidth = 1.5;
-    final majorPaint = Paint()
-      ..color = const Color(0xFF6F8978)
-      ..strokeWidth = 2;
+    final double centerX = size.width / 2.0;
+    final double pivotY = size.height * 0.85;
+    final double radius = size.width * 0.40;
 
-    for (int weight = minValue.toInt(); weight <= maxValue.toInt(); weight++) {
-      final x = (weight - minValue) * pixelsPerUnit;
-      final isMajor = weight % 10 == 0;
-      final isMedium = weight % 5 == 0;
-      final tickHeight = isMajor ? 30.0 : (isMedium ? 22.0 : 13.0);
+    // 1. Draw Arch Background Track Band
+    final trackPaint = Paint()
+      ..color = const Color(0xFFE5EFE3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 32.0
+      ..strokeCap = StrokeCap.round;
+
+    final Rect rect =
+        Rect.fromCircle(center: Offset(centerX, pivotY), radius: radius);
+    // Draw semi-circle arch from pi (180 deg) to 2*pi (360 deg)
+    canvas.drawArc(rect, math.pi, math.pi, false, trackPaint);
+
+    // 2. Draw Ticks around outer boundary of the arch
+    final double tickRadius = radius + 20.0;
+    const int totalTicks = 17;
+    for (int i = 0; i < totalTicks; i++) {
+      final double angle = math.pi + (i / (totalTicks - 1)) * math.pi;
+      final double dx1 = centerX + tickRadius * math.cos(angle);
+      final double dy1 = pivotY + tickRadius * math.sin(angle);
+      final double dx2 = centerX + (tickRadius + 10.0) * math.cos(angle);
+      final double dy2 = pivotY + (tickRadius + 10.0) * math.sin(angle);
+
+      final tickPaint = Paint()
+        ..color = const Color(0xFF556D5E)
+        ..strokeWidth = 2.0
+        ..strokeCap = StrokeCap.round;
+
+      canvas.drawLine(Offset(dx1, dy1), Offset(dx2, dy2), tickPaint);
+    }
+
+    // 3. Draw Vertical Pointer Needle (pointing straight up to top center of arch)
+    final pointerPaint = Paint()
+      ..color = activeColor
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(centerX, pivotY),
+      Offset(centerX, pivotY - radius - 16.0),
+      pointerPaint,
+    );
+
+    // 4. Draw Center Pivot Dark Node Circle
+    final pivotPaint = Paint()..color = const Color(0xFF0C2417);
+    canvas.drawCircle(Offset(centerX, pivotY), 10.0, pivotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeightDialPainter oldDelegate) =>
+      oldDelegate.value != value || oldDelegate.activeColor != activeColor;
+}
+
+class _HeightRulerPainter extends CustomPainter {
+  final double value;
+  final double minValue;
+  final double maxValue;
+  final Color activeColor;
+
+  _HeightRulerPainter({
+    required this.value,
+    required this.minValue,
+    required this.maxValue,
+    required this.activeColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double centerX = size.width * 0.48;
+    final double centerY = size.height / 2.0;
+
+    // Green vertical center line
+    final axisPaint = Paint()
+      ..color = activeColor
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+        Offset(centerX, 0), Offset(centerX, size.height), axisPaint);
+
+    // 28px per 1 cm height difference
+    const double pixelsPerUnit = 28.0;
+
+    final int startHeight = (value - (centerY / pixelsPerUnit)).floor() - 1;
+    final int endHeight = (value + (centerY / pixelsPerUnit)).ceil() + 1;
+
+    for (int h = startHeight; h <= endHeight; h++) {
+      if (h < minValue || h > maxValue) continue;
+
+      final double dy = centerY - (h - value) * pixelsPerUnit;
+      if (dy < -15 || dy > size.height + 15) continue;
+
+      final bool isCenterVal = ((h - value).abs() < 0.4);
+
+      // 1. Right Side Horizontal Ticks
+      final double tickLength = isCenterVal ? 32.0 : 20.0;
+      final tickPaint = Paint()
+        ..color = isCenterVal ? activeColor : const Color(0xFFB0C4B4)
+        ..strokeWidth = isCenterVal ? 3.5 : 1.5
+        ..strokeCap = StrokeCap.round;
+
       canvas.drawLine(
-          Offset(x, size.height - 28),
-          Offset(x, size.height - 28 - tickHeight),
-          isMajor ? majorPaint : minorPaint);
-      if (isMajor) {
-        final textPainter = TextPainter(
-          text: TextSpan(
-              text: '$weight',
-              style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF6F8978),
-                  fontWeight: FontWeight.w700)),
-          textDirection: TextDirection.ltr,
-        )..layout();
-        textPainter.paint(
-            canvas, Offset(x - textPainter.width / 2, size.height - 22));
-      }
-    }
-  }
+        Offset(centerX + 6, dy),
+        Offset(centerX + 6 + tickLength, dy),
+        tickPaint,
+      );
 
-  @override
-  bool shouldRepaint(covariant _WeightPickerPainter oldDelegate) =>
-      oldDelegate.value != value || oldDelegate.accent != accent;
-}
-
-class _HeightPickerWidget extends StatefulWidget {
-  final double value;
-  final double minValue;
-  final double maxValue;
-  final bool isValid;
-  final ValueChanged<double> onChanged;
-
-  const _HeightPickerWidget({
-    Key? key,
-    required this.value,
-    required this.minValue,
-    required this.maxValue,
-    required this.isValid,
-    required this.onChanged,
-  }) : super(key: key);
-
-  @override
-  State<_HeightPickerWidget> createState() => _HeightPickerWidgetState();
-}
-
-class _HeightPickerWidgetState extends State<_HeightPickerWidget> {
-  static const double _pixelsPerCm = 5.0;
-  bool _showInches = false;
-
-  double get _displayValue => _showInches ? widget.value / 2.54 : widget.value;
-
-  double _snap(double value) {
-    final clamped = value.clamp(widget.minValue, widget.maxValue);
-    return double.parse(clamped.round().toStringAsFixed(0));
-  }
-
-  void _changeByPixels(double delta) {
-    final next = _snap(widget.value - delta / _pixelsPerCm);
-    widget.onChanged(next);
-  }
-
-  void _setFromPosition(double localY, double height) {
-    final ratio = (localY / height).clamp(0.0, 1.0);
-    final next = widget.maxValue - ratio * (widget.maxValue - widget.minValue);
-    widget.onChanged(_snap(next));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final accent =
-        widget.isValid ? const Color(0xFF0F3827) : const Color(0xFFEF4444);
-    final track =
-        widget.isValid ? const Color(0xFFE5EEE6) : const Color(0xFFFDE2E2);
-    final range = widget.maxValue - widget.minValue;
-    final thumbPosition =
-        ((widget.maxValue - widget.value) / range).clamp(0.0, 1.0);
-
-    return Container(
-      height: 300,
-      padding: const EdgeInsets.fromLTRB(14, 14, 8, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FBF8),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: track),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'HEIGHT SCALE',
-                style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF556D5E),
-                    letterSpacing: 1),
-              ),
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    color: const Color(0xFFE3ECE4),
-                    borderRadius: BorderRadius.circular(20)),
-                child: Row(
-                  children: [
-                    _unitButton('CM', !_showInches,
-                        () => setState(() => _showInches = false)),
-                    _unitButton('IN', _showInches,
-                        () => setState(() => _showInches = true)),
-                  ],
-                ),
-              ),
-            ],
+      // 2. Left Side Height Numbers
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: '$h',
+          style: TextStyle(
+            fontSize: isCenterVal ? 16 : 13.5,
+            fontWeight: isCenterVal ? FontWeight.w900 : FontWeight.w600,
+            color: isCenterVal
+                ? const Color(0xFF0C2417)
+                : const Color(0xFF678270),
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final rulerHeight = constraints.maxHeight;
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (details) =>
-                      _changeByPixels(details.primaryDelta ?? 0),
-                  onTapDown: (details) =>
-                      _setFromPosition(details.localPosition.dy, rulerHeight),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Positioned.fill(
-                        right: 42,
-                        child: CustomPaint(
-                          painter: _HeightPickerPainter(
-                            value: widget.value,
-                            minValue: widget.minValue,
-                            maxValue: widget.maxValue,
-                            accent: accent,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 40,
-                        top: rulerHeight * 0.42,
-                        child: IgnorePointer(
-                          child: Container(height: 2, color: accent),
-                        ),
-                      ),
-                      Positioned(
-                        right: 10,
-                        top: 0,
-                        bottom: 0,
-                        child: Container(
-                            width: 3,
-                            decoration: BoxDecoration(
-                                color: track,
-                                borderRadius: BorderRadius.circular(3))),
-                      ),
-                      Positioned(
-                        right: 1,
-                        top: (rulerHeight - 20) * thumbPosition,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onVerticalDragUpdate: (details) =>
-                              _changeByPixels(details.primaryDelta ?? 0),
-                          child: Container(
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: accent, width: 2.5),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: accent.withOpacity(0.25),
-                                    blurRadius: 8)
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        right: 48,
-                        top: rulerHeight * 0.42 - 15,
-                        child: IgnorePointer(
-                          child: Text(
-                            '${_displayValue.round()} ${_showInches ? 'in' : 'cm'}',
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: accent),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text('Drag the thumb or scale to adjust',
-              style: TextStyle(fontSize: 11, color: const Color(0xFF7A9181))),
-        ],
-      ),
-    );
-  }
-
-  Widget _unitButton(String label, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFF0F3827) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: selected ? Colors.white : const Color(0xFF667D6F))),
-      ),
-    );
-  }
-}
+        textDirection: TextDirection.ltr,
+      )..layout();
 
-class _HeightPickerPainter extends CustomPainter {
-  final double value;
-  final double minValue;
-  final double maxValue;
-  final Color accent;
-
-  _HeightPickerPainter(
-      {required this.value,
-      required this.minValue,
-      required this.maxValue,
-      required this.accent});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final tickPaint = Paint()
-      ..color = const Color(0xFFB3C4B6)
-      ..strokeWidth = 1.5;
-    final majorPaint = Paint()
-      ..color = const Color(0xFF6F8978)
-      ..strokeWidth = 2;
-    final range = maxValue - minValue;
-    final pixelsPerUnit = size.height / range;
-
-    for (int height = minValue.toInt(); height <= maxValue.toInt(); height++) {
-      final y = (maxValue - height) * pixelsPerUnit;
-      final isMajor = height % 10 == 0;
-      final isMedium = height % 5 == 0;
-      final length = isMajor ? 34.0 : (isMedium ? 25.0 : 16.0);
-      canvas.drawLine(Offset(size.width - length, y), Offset(size.width, y),
-          isMajor ? majorPaint : tickPaint);
-      if (isMajor) {
-        final textPainter = TextPainter(
-          text: TextSpan(
-              text: '$height',
-              style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF6F8978),
-                  fontWeight: FontWeight.w700)),
-          textDirection: TextDirection.ltr,
-        )..layout();
-        textPainter.paint(
-            canvas,
-            Offset(size.width - length - textPainter.width - 8,
-                y - textPainter.height / 2));
-      }
+      textPainter.paint(
+        canvas,
+        Offset(centerX - textPainter.width - 12, dy - textPainter.height / 2),
+      );
     }
 
-    final selectedY = (maxValue - value) * pixelsPerUnit;
-    final markerPaint = Paint()
-      ..color = accent
-      ..strokeWidth = 2.5;
-    canvas.drawCircle(Offset(size.width - 3, selectedY), 5, markerPaint);
+    // 3. Active horizontal pointer line on left side extending across center line
+    final pointerPaint = Paint()
+      ..color = activeColor
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(centerX - 68, centerY),
+      Offset(centerX, centerY),
+      pointerPaint,
+    );
+
+    // 4. Green thumb dot on the center axis line
+    final dotPaint = Paint()..color = activeColor;
+    canvas.drawCircle(Offset(centerX, centerY), 5.0, dotPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _HeightPickerPainter oldDelegate) =>
-      oldDelegate.value != value || oldDelegate.accent != accent;
+  bool shouldRepaint(covariant _HeightRulerPainter oldDelegate) =>
+      oldDelegate.value != value || oldDelegate.activeColor != activeColor;
 }
+
+
 
 class _MeasurementRulerWidget extends StatefulWidget {
   final double value;

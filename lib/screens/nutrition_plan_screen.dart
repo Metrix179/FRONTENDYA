@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/interactive_eye_logo.dart';
@@ -19,9 +20,9 @@ class _MealData {
   final String category;
   final String time;
   final IconData icon;
-  int currentOptionIndex;
-  bool isExpanded;
-  bool isSwapping;
+  int currentOptionIndex = 0;
+  bool isExpanded = false;
+  bool isSwapping = false;
   final List<Map<String, String>> options;
 
   _MealData({
@@ -29,15 +30,39 @@ class _MealData {
     required this.category,
     required this.time,
     required this.icon,
-    this.currentOptionIndex = 0,
-    this.isExpanded = false,
-    this.isSwapping = false,
     required this.options,
   });
 }
 
 class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
   bool _isDarkMode = false;
+  Timer? _timer;
+  final int _startMinutes = 8 * 60; // 8:00 AM
+  final int _endMinutes = 19 * 60; // 7:00 PM
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  double _calculateDayProgress() {
+    final now = DateTime.now();
+    final currentMinutes = now.hour * 60 + now.minute;
+
+    if (currentMinutes <= _startMinutes) return 0.0;
+    if (currentMinutes >= _endMinutes) return 1.0;
+
+    return (currentMinutes - _startMinutes) / (_endMinutes - _startMinutes);
+  }
 
   Color get _pageBackground =>
       _isDarkMode ? const Color(0xFF14241B) : const Color(0xFFEEF3ED);
@@ -300,20 +325,55 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
   }
 
   Widget _buildTimelineList() {
+    final progress = _calculateDayProgress();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Stack(
         children: [
-          // Vertical Line
+          // Background Track Line & Animated Fill Line
           Positioned(
-            left: 17,
+            left: 16,
             top: 24,
             bottom: 30,
             child: Container(
-              width: 3,
+              width: 5,
               decoration: BoxDecoration(
-                color: const Color(0xFF65E042),
-                borderRadius: BorderRadius.circular(2),
+                color: _isDarkMode
+                    ? const Color(0xFF264232)
+                    : const Color(0xFFD3ECE1),
+                borderRadius: BorderRadius.circular(2.5),
+              ),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.0, end: progress),
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeOut,
+                builder: (context, value, child) {
+                  return Align(
+                    alignment: Alignment.topCenter,
+                    child: FractionallySizedBox(
+                      heightFactor: value,
+                      child: Container(
+                        width: 5,
+                        decoration: BoxDecoration(
+                          color: _isDarkMode
+                              ? const Color(0xFF4ADE80)
+                              : const Color(0xFF86BF15),
+                          borderRadius: BorderRadius.circular(2.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (_isDarkMode
+                                      ? const Color(0xFF4ADE80)
+                                      : const Color(0xFF86BF15))
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

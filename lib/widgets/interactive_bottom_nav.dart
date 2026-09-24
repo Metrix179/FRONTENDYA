@@ -161,21 +161,26 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
         });
       },
       child: Container(
-        margin: const EdgeInsets.only(left: 14, right: 14, top: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF0C2417),
-          borderRadius: BorderRadius.circular(28),
+          color: const Color(0xFFF7FAF7).withOpacity(0.96),
+          borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.35),
-              blurRadius: 24,
-              offset: const Offset(0, 10),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: const Color(0xFF163224).withOpacity(0.04),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
+            color: const Color(0xFFE2EBE2),
+            width: 1.2,
           ),
         ),
         child: Row(
@@ -184,7 +189,7 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
             _buildNavItem(0, Icons.home_rounded),
             _buildNavItem(1, Icons.trending_up_rounded),
             _buildScanButton(),
-            _buildNavItem(3, Icons.restaurant_menu_rounded),
+            _buildNavItem(3, Icons.flatware_rounded),
             _buildNavItem(4, Icons.person_rounded),
           ],
         ),
@@ -198,7 +203,7 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
 
     return Container(
       key: _itemKeys[index],
-      margin: const EdgeInsets.symmetric(horizontal: 3),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
       child: Transform.translate(
         offset: Offset(_dxDrifts[index], _yLifts[index]),
         child: Transform.scale(
@@ -211,10 +216,10 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
-                // Floating elevated bubble (seen in video at 00:21-00:26)
+                // Floating elevated bubble
                 if (isElevated)
                   Positioned(
-                    top: -36,
+                    top: -42,
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 150),
                       opacity: 1.0,
@@ -222,13 +227,13 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A1E13),
+                          color: const Color(0xFF163224),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                              color: const Color(0xFF2AE196).withOpacity(0.4)),
+                              color: const Color(0xFF2DE099).withOpacity(0.6)),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withOpacity(0.3),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -238,7 +243,7 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(icon,
-                                size: 16, color: const Color(0xFF2AE196)),
+                                size: 16, color: const Color(0xFF2DE099)),
                             Text(
                               _labels[index],
                               style: const TextStyle(
@@ -253,42 +258,58 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
                     ),
                   ),
 
-                // Base nav item
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutBack,
-                  transform: Matrix4.identity()
-                    ..scale(isElevated ? 0.9 : (isSelected ? 1.05 : 1.0)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.white.withOpacity(0.12)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
+                // Base nav item: rounded tile matching screenshot
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutBack,
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF163224),
+                        borderRadius: BorderRadius.circular(16),
+                        border: isSelected
+                            ? Border.all(
+                                color: const Color(0xFF2DE099), width: 2.2)
+                            : null,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF163224).withOpacity(0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
                         icon,
                         color: isSelected
                             ? Colors.white
-                            : Colors.white.withOpacity(0.6),
+                            : Colors.white.withOpacity(0.75),
                         size: 23,
                       ),
-                      const SizedBox(height: 3),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: isSelected ? 5 : 0,
-                        height: isSelected ? 5 : 0,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2AE196),
-                          shape: BoxShape.circle,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: isSelected ? 6 : 0,
+                      height: isSelected ? 6 : 0,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2DE099),
+                        shape: BoxShape.circle,
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF2DE099).withOpacity(0.8),
+                                  blurRadius: 6,
+                                  spreadRadius: 1,
+                                )
+                              ]
+                            : null,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -301,7 +322,7 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
   Widget _buildScanButton() {
     return Container(
       key: _itemKeys[2],
-      margin: const EdgeInsets.symmetric(horizontal: 3),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
       child: Transform.translate(
         offset: Offset(_dxDrifts[2], _yLifts[2]),
         child: Transform.scale(
@@ -309,22 +330,23 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
           child: GestureDetector(
             onTap: widget.onScanPressed,
             child: Container(
-              padding: const EdgeInsets.all(11),
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
-                color: const Color(0xFF2AE196),
-                borderRadius: BorderRadius.circular(18),
+                color: const Color(0xFF2DE099),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2AE196).withOpacity(0.45),
-                    blurRadius: 14,
+                    color: const Color(0xFF2DE099).withOpacity(0.5),
+                    blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: const Icon(
-                Icons.qr_code_scanner_rounded,
-                color: Color(0xFF0A2014),
-                size: 25,
+                Icons.crop_free_rounded,
+                color: Color(0xFF0C2417),
+                size: 26,
               ),
             ),
           ),
@@ -333,3 +355,4 @@ class _InteractiveBottomNavState extends State<InteractiveBottomNav>
     );
   }
 }
+
