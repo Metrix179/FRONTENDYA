@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class VitalsRecord {
@@ -105,4 +106,18 @@ class VitalsNotifier extends Notifier<List<VitalsRecord>> {
 
 final vitalsProvider = NotifierProvider<VitalsNotifier, List<VitalsRecord>>(
   VitalsNotifier.new,
+);
+
+class ChildImageNotifier extends Notifier<Uint8List?> {
+  @override
+  Uint8List? build() => null;
+
+  void setImage(Uint8List? bytes) {
+    state = bytes;
+  }
+}
+
+final childProfileImageProvider =
+    NotifierProvider<ChildImageNotifier, Uint8List?>(
+  ChildImageNotifier.new,
 );

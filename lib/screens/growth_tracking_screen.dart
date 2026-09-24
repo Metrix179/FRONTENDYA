@@ -1469,7 +1469,7 @@ mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
                 ],
               ),
             ),
-          ]     ]
+          ]
 
           // STEP 4: Enter Height (Measurement Ruler)
           else if (_calcStep == 4) ...[
@@ -1889,14 +1889,14 @@ class _WeightDialPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double centerX = size.width / 2.0;
-    final double pivotY = size.height * 0.85;
-    final double radius = size.width * 0.40;
+    final double pivotY = size.height * 0.82;
+    final double radius = size.width * 0.38;
 
     // 1. Draw Arch Background Track Band
     final trackPaint = Paint()
-      ..color = const Color(0xFFE5EFE3)
+      ..color = const Color(0xFFE2EDE0)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 32.0
+      ..strokeWidth = 28.0
       ..strokeCap = StrokeCap.round;
 
     final Rect rect =
@@ -1904,38 +1904,41 @@ class _WeightDialPainter extends CustomPainter {
     // Draw semi-circle arch from pi (180 deg) to 2*pi (360 deg)
     canvas.drawArc(rect, math.pi, math.pi, false, trackPaint);
 
-    // 2. Draw Ticks around outer boundary of the arch
-    final double tickRadius = radius + 20.0;
-    const int totalTicks = 17;
+    // 2. Draw Ticks around outer boundary of the arch (crossing the track)
+    const int totalTicks = 21;
     for (int i = 0; i < totalTicks; i++) {
       final double angle = math.pi + (i / (totalTicks - 1)) * math.pi;
-      final double dx1 = centerX + tickRadius * math.cos(angle);
-      final double dy1 = pivotY + tickRadius * math.sin(angle);
-      final double dx2 = centerX + (tickRadius + 10.0) * math.cos(angle);
-      final double dy2 = pivotY + (tickRadius + 10.0) * math.sin(angle);
+      final bool isMajor = (i % 2 == 0);
+      final double innerR = isMajor ? radius - 16.0 : radius - 9.0;
+      final double outerR = isMajor ? radius + 16.0 : radius + 9.0;
+
+      final double dx1 = centerX + innerR * math.cos(angle);
+      final double dy1 = pivotY + innerR * math.sin(angle);
+      final double dx2 = centerX + outerR * math.cos(angle);
+      final double dy2 = pivotY + outerR * math.sin(angle);
 
       final tickPaint = Paint()
-        ..color = const Color(0xFF556D5E)
-        ..strokeWidth = 2.0
+        ..color = isMajor ? const Color(0xFF2C4334) : const Color(0xFF5A7363)
+        ..strokeWidth = isMajor ? 2.5 : 1.6
         ..strokeCap = StrokeCap.round;
 
       canvas.drawLine(Offset(dx1, dy1), Offset(dx2, dy2), tickPaint);
     }
 
-    // 3. Draw Vertical Pointer Needle (pointing straight up to top center of arch)
+    // 3. Draw Vertical Pointer Needle (pointing straight up from center to top tick)
     final pointerPaint = Paint()
       ..color = activeColor
       ..strokeWidth = 3.5
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(
       Offset(centerX, pivotY),
-      Offset(centerX, pivotY - radius - 16.0),
+      Offset(centerX, pivotY - radius - 20.0),
       pointerPaint,
     );
 
     // 4. Draw Center Pivot Dark Node Circle
     final pivotPaint = Paint()..color = const Color(0xFF0C2417);
-    canvas.drawCircle(Offset(centerX, pivotY), 10.0, pivotPaint);
+    canvas.drawCircle(Offset(centerX, pivotY), 11.0, pivotPaint);
   }
 
   @override

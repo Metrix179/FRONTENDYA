@@ -82,7 +82,8 @@ class _CardSwapStackState extends State<CardSwapStack>
       _syncFrontCard(widget.currentIndex);
     }
 
-    if (widget.currentIndex != oldWidget.currentIndex && widget.currentIndex >= 0) {
+    if (widget.currentIndex != oldWidget.currentIndex &&
+        widget.currentIndex >= 0) {
       _syncFrontCard(widget.currentIndex);
     }
 
@@ -100,7 +101,9 @@ class _CardSwapStackState extends State<CardSwapStack>
   }
 
   void _syncFrontCard(int targetIndex) {
-    if (widget.cards.isEmpty || targetIndex < 0 || targetIndex >= widget.cards.length) {
+    if (widget.cards.isEmpty ||
+        targetIndex < 0 ||
+        targetIndex >= widget.cards.length) {
       return;
     }
 
@@ -127,6 +130,38 @@ class _CardSwapStackState extends State<CardSwapStack>
     _controller.forward();
   }
 
+  Color _getSlotColor(double slot, int total) {
+    final List<Color> colors = [
+      const Color(0xFFFFFFFF), // Slot 0 (Front): Pure White
+      const Color(0xFFDBE7DA), // Slot 1 (Middle): Medium Light Sage
+      const Color(0xFFC3D5C1), // Slot 2 (Back): Darker Sage
+    ];
+
+    final maxIndex = (colors.length - 1).toDouble();
+    final clamped = slot.clamp(0.0, maxIndex);
+    final int index = clamped.floor();
+    final double t = clamped - index;
+
+    if (index >= colors.length - 1) return colors.last;
+    return Color.lerp(colors[index], colors[index + 1], t)!;
+  }
+
+  Color _getSlotBorderColor(double slot, int total) {
+    final List<Color> colors = [
+      const Color(0xFFE2EBE2), // Slot 0 Border
+      const Color(0xFFC7D7C9), // Slot 1 Border
+      const Color(0xFFB4C7B3), // Slot 2 Border
+    ];
+
+    final maxIndex = (colors.length - 1).toDouble();
+    final clamped = slot.clamp(0.0, maxIndex);
+    final int index = clamped.floor();
+    final double t = clamped - index;
+
+    if (index >= colors.length - 1) return colors.last;
+    return Color.lerp(colors[index], colors[index + 1], t)!;
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -142,90 +177,123 @@ class _CardSwapStackState extends State<CardSwapStack>
 
     final total = _order.length;
 
-    return SizedBox(
-      width: widget.cardWidth + (widget.cardDistance * (total - 1)),
-      height: widget.cardHeight + (widget.verticalDistance * (total - 1)) + 16,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          final t = _animation.value;
-          final renderList = <_CardRenderData>[];
+    return GestureDetector(
+      onTap: _triggerSwap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: widget.cardWidth + (widget.cardDistance * (total - 1)),
+        height: widget.cardHeight + (widget.verticalDistance * (total - 1)) + 16,
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            final t = _animation.value;
+            final renderList = <_CardRenderData>[];
 
-          for (int slotIndex = 0; slotIndex < total; slotIndex++) {
-            final cardIndex = _order[slotIndex];
-            double xOffset;
-            double yOffset;
-            double scale;
-            int zPriority;
+            for (int slotIndex = 0; slotIndex < total; slotIndex++) {
+              final cardIndex = _order[slotIndex];
+              double xOffset;
+              double yOffset;
+              double scale;
+              int zPriority;
+              double fractionalSlot;
 
-            if (slotIndex == 0) {
-              final backSlot = total - 1;
-              if (t < 0.45) {
-                final dropProgress = t / 0.45;
-                xOffset = (widget.cardDistance * backSlot * 0.2) * dropProgress;
-                yOffset = 180.0 * dropProgress;
-                scale = 1.0 - (0.04 * dropProgress);
-                zPriority = 100;
+              if (slotIndex == 0) {
+                final backSlot = total - 1;
+                fractionalSlot = t * backSlot;
+                if (t < 0.45) {
+                  final dropProgress = t / 0.45;
+                  xOffset = (widget.cardDistance * backSlot * 0.2) * dropProgress;
+                  yOffset = 180.0 * dropProgress;
+                  scale = 1.0 - (0.04 * dropProgress);
+                  zPriority = 100;
+                } else {
+                  final returnProgress = (t - 0.45) / 0.55;
+                  final startX = widget.cardDistance * backSlot * 0.2;
+                  final targetX = widget.cardDistance * backSlot;
+                  final startY = 180.0;
+                  final targetY = -widget.verticalDistance * backSlot;
+
+                  xOffset = startX + (targetX - startX) * returnProgress;
+                  yOffset = startY + (targetY - startY) * returnProgress;
+                  scale = 0.96 - (0.04 * returnProgress);
+                  zPriority = 0;
+                }
               } else {
-                final returnProgress = (t - 0.45) / 0.55;
-                final startX = widget.cardDistance * backSlot * 0.2;
-                final targetX = widget.cardDistance * backSlot;
-                final startY = 180.0;
-                final targetY = -widget.verticalDistance * backSlot;
+                final currentSlot = slotIndex;
+                final targetSlot = slotIndex - 1;
+                fractionalSlot = currentSlot - t;
 
-                xOffset = startX + (targetX - startX) * returnProgress;
-                yOffset = startY + (targetY - startY) * returnProgress;
-                scale = 0.96 - (0.04 * returnProgress);
-                zPriority = 0;
+                final startX = widget.cardDistance * currentSlot;
+                final targetX = widget.cardDistance * targetSlot;
+                final startY = -widget.verticalDistance * currentSlot;
+                final targetY = -widget.verticalDistance * targetSlot;
+
+                xOffset = startX + (targetX - startX) * t;
+                yOffset = startY + (targetY - startY) * t;
+                scale = (1.0 - 0.04 * currentSlot) + (0.04 * t);
+                zPriority = total - slotIndex;
               }
-            } else {
-              final currentSlot = slotIndex;
-              final targetSlot = slotIndex - 1;
 
-              final startX = widget.cardDistance * currentSlot;
-              final targetX = widget.cardDistance * targetSlot;
-              final startY = -widget.verticalDistance * currentSlot;
-              final targetY = -widget.verticalDistance * targetSlot;
-
-              xOffset = startX + (targetX - startX) * t;
-              yOffset = startY + (targetY - startY) * t;
-              scale = (1.0 - 0.04 * currentSlot) + (0.04 * t);
-              zPriority = total - slotIndex;
-            }
-
-            renderList.add(
-              _CardRenderData(
-                cardIndex: cardIndex,
-                xOffset: xOffset,
-                yOffset: yOffset,
-                scale: scale,
-                zPriority: zPriority,
-              ),
-            );
-          }
-
-          renderList.sort((a, b) => a.zPriority.compareTo(b.zPriority));
-
-          return Stack(
-            alignment: Alignment.center,
-            children: renderList.map((data) {
-              return Positioned(
-                key: ValueKey(data.cardIndex),
-                child: Transform.translate(
-                  offset: Offset(data.xOffset, data.yOffset),
-                  child: Transform.scale(
-                    scale: data.scale,
-                    child: SizedBox(
-                      width: widget.cardWidth,
-                      height: widget.cardHeight,
-                      child: widget.cards[data.cardIndex],
-                    ),
-                  ),
+              renderList.add(
+                _CardRenderData(
+                  cardIndex: cardIndex,
+                  xOffset: xOffset,
+                  yOffset: yOffset,
+                  scale: scale,
+                  zPriority: zPriority,
+                  fractionalSlot: fractionalSlot,
                 ),
               );
-            }).toList(),
-          );
-        },
+            }
+
+            renderList.sort((a, b) => a.zPriority.compareTo(b.zPriority));
+
+            return Stack(
+              alignment: Alignment.center,
+              children: renderList.map((data) {
+                final bgColor = _getSlotColor(data.fractionalSlot, total);
+                final borderColor =
+                    _getSlotBorderColor(data.fractionalSlot, total);
+                final shadowOpacity = (0.05 *
+                        (1.0 -
+                            (data.fractionalSlot / (total - 1))
+                                .clamp(0.0, 1.0)))
+                    .clamp(0.0, 0.05);
+
+                return Positioned(
+                  key: ValueKey(data.cardIndex),
+                  child: Transform.translate(
+                    offset: Offset(data.xOffset, data.yOffset),
+                    child: Transform.scale(
+                      scale: data.scale,
+                      child: Container(
+                        width: widget.cardWidth,
+                        height: widget.cardHeight,
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: BorderRadius.circular(26),
+                          border: Border.all(color: borderColor, width: 1.5),
+                          boxShadow: shadowOpacity > 0.001
+                              ? [
+                                  BoxShadow(
+                                    color:
+                                        Colors.black.withOpacity(shadowOpacity),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: widget.cards[data.cardIndex],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
       ),
     );
   }
@@ -237,6 +305,7 @@ class _CardRenderData {
   final double yOffset;
   final double scale;
   final int zPriority;
+  final double fractionalSlot;
 
   _CardRenderData({
     required this.cardIndex,
@@ -244,5 +313,6 @@ class _CardRenderData {
     required this.yOffset,
     required this.scale,
     required this.zPriority,
+    required this.fractionalSlot,
   });
 }

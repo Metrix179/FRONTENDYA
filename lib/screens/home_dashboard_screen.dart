@@ -190,6 +190,13 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
     );
   }
 
+  String _getGreetingText() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   Widget _buildGreeting() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -197,14 +204,15 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Good morning, ${widget.childName}',
+            '${_getGreetingText()}, ${widget.childName}',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 34,
               fontWeight: FontWeight.w900,
               color: _isDarkMode
                   ? const Color(0xFFE8F2EA)
                   : const Color(0xFF163224),
-              letterSpacing: -0.5,
+              letterSpacing: -0.8,
+              height: 1.1,
             ),
           ),
           const SizedBox(height: 4),
@@ -240,18 +248,6 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
           // Card 0: Current Vitals (Matching the reference screenshot exactly)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: const Color(0xFFE2EBE2), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -295,18 +291,6 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
           // Card 1: Growth Status Card
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF6FAF6),
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: const Color(0xFFD2DFD3), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -367,18 +351,6 @@ class _HomeDashboardScreenBodyState extends State<HomeDashboardScreenBody> {
           // Card 2: Assessment Card
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEF5EF),
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: const Color(0xFFC7D7C9), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

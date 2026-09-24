@@ -1,8 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/vitals_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../utils/image_picker_helper.dart';
 import '../widgets/interactive_eye_logo.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -54,6 +56,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _isHistoryView = widget.initialHistoryView;
   }
 
+  Future<void> _pickChildImage() async {
+    try {
+      final bytes = await pickImageBytes();
+      if (bytes != null && mounted) {
+        ref.read(childProfileImageProvider.notifier).setImage(bytes);
+      }
+    } catch (e) {
+      debugPrint('Error picking child image: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppThemeTransition(
@@ -66,8 +79,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _buildTopBar(),
               Expanded(
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                  padding: const EdgeInsets.only(
+                      left: 18, right: 18, top: 6, bottom: 130),
                   child: _isHistoryView
                       ? _buildHistoryView()
                       : _buildProfileView(),
@@ -175,6 +188,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildProfileView() {
+    final childImageBytes = ref.watch(childProfileImageProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -245,32 +260,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           child: Row(
             children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: _softSurface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _isDarkMode
-                        ? const Color(0xFF45624E)
-                        : const Color(0xFFD8E3D8),
-                    style: BorderStyle.solid,
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _pickChildImage,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: _softSurface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _isDarkMode
+                          ? const Color(0xFF45624E)
+                          : const Color(0xFFD8E3D8),
+                      style: BorderStyle.solid,
+                    ),
                   ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_photo_alternate_outlined,
-                        size: 28, color: _secondaryText),
-                    const SizedBox(height: 4),
-                    Text('NO PHOTO',
-                        style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: _secondaryText,
-                            letterSpacing: 0.8)),
-                  ],
+                  child: childImageBytes != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.memory(
+                                childImageBytes,
+                                fit: BoxFit.cover,
+                              ),
+                              Positioned(
+                                right: 6,
+                                bottom: 6,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.65),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.edit,
+                                    size: 13,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_photo_alternate_outlined,
+                                size: 28, color: _secondaryText),
+                            const SizedBox(height: 4),
+                            Text('NO PHOTO',
+                                style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    color: _secondaryText,
+                                    letterSpacing: 0.8)),
+                          ],
+                        ),
                 ),
               ),
               const SizedBox(width: 16),
