@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../state/vitals_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/interactive_eye_logo.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final String childName;
   final VoidCallback? onLogout;
   final bool initialHistoryView;
@@ -16,10 +18,10 @@ class ProfileScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isDarkMode = false;
   bool _isHistoryView = false;
   int _historyMetricIndex = 0;
@@ -430,28 +432,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  String _monthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[(month - 1).clamp(0, 11)];
+  }
+
+  String _formatTime(DateTime dt) {
+    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final period = dt.hour >= 12 ? 'pm' : 'am';
+    return '$hour:$minute $period';
+  }
+
   Widget _buildHistoryView() {
+    final vitalsList = ref.watch(vitalsProvider);
+    final latest = vitalsList.isNotEmpty ? vitalsList.first : null;
+
     final metrics = [
       {
         'label': 'HEIGHT',
-        'value': '90.5 cm',
+        'value': latest?.formattedHeight ?? '92.5 cm',
         'icon': Icons.straighten,
-        'idx': '01 / 03'
+        'idx': '01 / 05'
       },
       {
         'label': 'WEIGHT',
-        'value': '14.8 kg',
+        'value': latest?.formattedWeight ?? '14.2 kg',
         'icon': Icons.scale,
-        'idx': '02 / 03'
+        'idx': '02 / 05'
       },
       {
         'label': 'AGE',
-        'value': '13y 6m',
+        'value': latest?.formattedAge ?? '2y 3m',
         'icon': Icons.calendar_today,
-        'idx': '03 / 03'
+        'idx': '03 / 05'
+      },
+      {
+        'label': 'GENDER',
+        'value': latest?.gender ?? 'Boy',
+        'icon': Icons.person_outline,
+        'idx': '04 / 05'
+      },
+      {
+        'label': 'BMI',
+        'value': latest?.formattedBmi ?? '16.6',
+        'icon': Icons.monitor_weight_outlined,
+        'idx': '05 / 05'
       },
     ];
-    final active = metrics[_historyMetricIndex];
+    final activeIndex = _historyMetricIndex.clamp(0, metrics.length - 1);
+    final active = metrics[activeIndex];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -480,8 +513,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ? const Color(0xFF4B9962)
                     : const Color(0xFFBCE4BC)),
           ),
-          child: const Text('Health status : Healthy',
-              style: TextStyle(
+          child: Text('Health status : ${latest?.status ?? "Healthy"}',
+              style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF065F46))),
@@ -491,7 +524,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(fontSize: 13, color: _secondaryText)),
         const SizedBox(height: 16),
 
-        // CURRENT DETAILS (01 / 03)
+        // CURRENT DETAILS (01 / 05)
         Align(
             alignment: Alignment.centerLeft,
             child: _buildSectionHeader('CURRENT DETAILS',
@@ -531,10 +564,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       metrics.length,
                       (i) => Container(
                             margin: const EdgeInsets.only(right: 6),
-                            width: i == _historyMetricIndex ? 22 : 6,
+                            width: i == activeIndex ? 22 : 6,
                             height: 6,
                             decoration: BoxDecoration(
-                              color: i == _historyMetricIndex
+                              color: i == activeIndex
                                   ? const Color(0xFF10B981)
                                   : (_isDarkMode
                                       ? const Color(0xFF45624E)
@@ -549,52 +582,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 18),
 
-        // PREVIOUS SCANS
+        // PREVIOUS SCANS & RECORDS
         Align(
             alignment: Alignment.centerLeft,
             child: _buildSectionHeader('PREVIOUS SCANS & RECORDS',
-                right: '01 entries')),
+                right: '${vitalsList.length.toString().padLeft(2, '0')} entries')),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: _cardColor,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: _cardBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        if (vitalsList.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: _cardBorder),
+            ),
+            child: Center(
+              child: Text('No vitals records logged yet.',
+                  style: TextStyle(color: _secondaryText)),
+            ),
+          )
+        else
+          ...vitalsList.map((record) {
+            final dateStr =
+                "${record.date.day} ${_monthName(record.date.month)} ${record.date.year}, ${_formatTime(record.date)}";
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _cardColor,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: _cardBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('GROWTH TRACKING',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          color: _secondaryText)),
-                  Text('22 Sept 2026, 7:25 pm',
-                      style: TextStyle(fontSize: 11.5, color: _secondaryText)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('LOGGED VITALS',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              color: _secondaryText)),
+                      Text(dateStr,
+                          style: TextStyle(fontSize: 11.5, color: _secondaryText)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(record.status,
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: _primaryText)),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(record.gender,
+                            style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F3827))),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _statCol('HEIGHT', record.formattedHeight),
+                      _statCol('WEIGHT', record.formattedWeight),
+                      _statCol('BMI', record.formattedBmi),
+                      _statCol('AGE', record.formattedAge),
+                    ],
+                  ),
                 ],
               ),
-              const SizedBox(height: 6),
-              Text('On Track',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: _primaryText)),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _statCol('HEIGHT', '90.5 cm'),
-                  _statCol('WEIGHT', '14.8 kg'),
-                  _statCol('BMI', '16.2'),
-                ],
-              ),
-            ],
-          ),
-        ),
+            );
+          }).toList(),
         const SizedBox(height: 18),
 
         // DOCTOR'S PRESCRIPTION

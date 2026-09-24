@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../state/vitals_provider.dart';
 import '../theme/app_theme.dart';
 import 'profile_screen.dart';
 import '../widgets/interactive_eye_logo.dart';
 
 /// Standalone screen version of Growth Tracking (pushed via Navigator).
 /// Has its own Scaffold + back navigation, no bottom nav.
-class GrowthTrackingScreen extends StatefulWidget {
+class GrowthTrackingScreen extends ConsumerStatefulWidget {
   final String childName;
 
   const GrowthTrackingScreen({
@@ -14,12 +16,12 @@ class GrowthTrackingScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<GrowthTrackingScreen> createState() => _GrowthTrackingScreenState();
+  ConsumerState<GrowthTrackingScreen> createState() => _GrowthTrackingScreenState();
 }
 
 /// Body-only version of Growth Tracking (rendered inside MainScaffold for tab 1).
 /// No Scaffold, no bottom nav.
-class GrowthTrackingScreenBody extends StatefulWidget {
+class GrowthTrackingScreenBody extends ConsumerStatefulWidget {
   final String childName;
 
   const GrowthTrackingScreenBody({
@@ -28,10 +30,10 @@ class GrowthTrackingScreenBody extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<GrowthTrackingScreenBody> createState() => _GrowthTrackingBodyState();
+  ConsumerState<GrowthTrackingScreenBody> createState() => _GrowthTrackingBodyState();
 }
 
-class _GrowthTrackingScreenState extends State<GrowthTrackingScreen>
+class _GrowthTrackingScreenState extends ConsumerState<GrowthTrackingScreen>
     with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
   @override
   String get childName => widget.childName;
@@ -77,7 +79,7 @@ class _GrowthTrackingScreenState extends State<GrowthTrackingScreen>
   }
 }
 
-class _GrowthTrackingBodyState extends State<GrowthTrackingScreenBody>
+class _GrowthTrackingBodyState extends ConsumerState<GrowthTrackingScreenBody>
     with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
   @override
   String get childName => widget.childName;
@@ -120,7 +122,7 @@ class _GrowthTrackingBodyState extends State<GrowthTrackingScreenBody>
   }
 }
 
-class GrowthVitalsCalculatorScreen extends StatefulWidget {
+class GrowthVitalsCalculatorScreen extends ConsumerStatefulWidget {
   final String childName;
   final void Function(double weight, double height)? onSaved;
 
@@ -131,12 +133,12 @@ class GrowthVitalsCalculatorScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<GrowthVitalsCalculatorScreen> createState() =>
+  ConsumerState<GrowthVitalsCalculatorScreen> createState() =>
       _GrowthVitalsCalculatorScreenState();
 }
 
 class _GrowthVitalsCalculatorScreenState
-    extends State<GrowthVitalsCalculatorScreen>
+    extends ConsumerState<GrowthVitalsCalculatorScreen>
     with SingleTickerProviderStateMixin, _GrowthTrackingMixin {
   @override
   String get childName => widget.childName;
@@ -160,8 +162,8 @@ class _GrowthVitalsCalculatorScreenState
 }
 
 // Shared mixin holding all state and build methods for Growth Tracking.
-mixin _GrowthTrackingMixin<T extends StatefulWidget>
-    on State<T>, SingleTickerProviderStateMixin<T> {
+mixin _GrowthTrackingMixin<T extends ConsumerStatefulWidget>
+    on ConsumerState<T>, SingleTickerProviderStateMixin<T> {
   // Subclass must provide childName
   String get childName;
   void Function(double weight, double height)? get onCalculatorSaved => null;
@@ -1491,6 +1493,16 @@ mixin _GrowthTrackingMixin<T extends StatefulWidget>
                 setState(() => _calcStep = 5);
               } else {
                 // Save to profile and switch back to Trends with animated numbers
+                ref.read(vitalsProvider.notifier).addRecord(
+                  childName: childName,
+                  gender: _calcGender,
+                  ageYears: _calcAgeYears,
+                  ageMonths: _calcAgeMonths,
+                  weight: _calcWeight,
+                  height: _calcHeight,
+                  status: 'On Track',
+                );
+
                 final savedCallback = onCalculatorSaved;
                 if (savedCallback != null) {
                   savedCallback(_calcWeight, _calcHeight);
