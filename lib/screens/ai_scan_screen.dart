@@ -622,42 +622,44 @@ class _AiScanScreenState extends State<AiScanScreen>
 
   // 2. MASCOT MODE (00:12 - 00:31)
   Widget _buildMascotView() {
-    _loadMascotVideo(_selectedMascotIndex);
-    final active = _mascots[_selectedMascotIndex];
-    final isVideoReady = _mascotVideoController != null &&
-        _mascotVideoController!.value.isInitialized;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'INTERACTIVE MODE',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF047857),
-              letterSpacing: 1.5,
+          Center(
+            child: Column(
+              children: [
+                const Text(
+                  'INTERACTIVE MODE',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF047857),
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Look here, ${widget.childName}!',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0C2417),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Pick a mascot to keep ${widget.childName} focused.',
+                  style:
+                      const TextStyle(fontSize: 13.5, color: Color(0xFF556D5E)),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            'Look here, ${widget.childName}!',
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF0C2417),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Pick a mascot to keep ${widget.childName} focused.',
-            style: const TextStyle(fontSize: 13.5, color: Color(0xFF556D5E)),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
-          // 3D Isometric Card Swap Deck Stack (Laterally Inverted)
+          // 3D Animated Full-Bleed Video Card Deck Stack (Matching Reference Design)
           MascotCardSwapDeck(
             mascots: _mascots,
             selectedIndex: _selectedMascotIndex,
@@ -667,165 +669,7 @@ class _AiScanScreenState extends State<AiScanScreen>
               _loadMascotVideo(index);
             },
           ),
-          const SizedBox(height: 16),
-
-          // Bigger, Smoother Mascot Video Player Screen
-          Container(
-            height: 240,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFF09120D),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFF3FFF80), width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF3FFF80).withOpacity(0.24),
-                  blurRadius: 24,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (isVideoReady)
-                    FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: _mascotVideoController!.value.size.width > 0
-                            ? _mascotVideoController!.value.size.width
-                            : 320,
-                        height: _mascotVideoController!.value.size.height > 0
-                            ? _mascotVideoController!.value.size.height
-                            : 240,
-                        child: VideoPlayer(_mascotVideoController!),
-                      ),
-                    )
-                  else
-                    Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF3FFF80).withOpacity(0.12),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(active['emoji'],
-                                style: const TextStyle(fontSize: 48)),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Loading ${active['name']}...',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Initializing Mascot Stream',
-                            style:
-                                TextStyle(color: Colors.white60, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 14),
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.black87, Colors.transparent],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 21,
-                                backgroundColor: Colors.white24,
-                                child: Text(active['emoji'],
-                                    style: const TextStyle(fontSize: 22)),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    active['name'],
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 19,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    active['subtitle'],
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF3FFF80).withOpacity(0.18),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: const Color(0xFF3FFF80).withOpacity(0.6),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF3FFF80),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  'PLAYING',
-                                  style: TextStyle(
-                                    color: Color(0xFF3FFF80),
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
 
           // Primary Scan Button in Mascot Mode
           ElevatedButton.icon(
@@ -881,6 +725,7 @@ class _AiScanScreenState extends State<AiScanScreen>
       ),
     );
   }
+
 
 
 
@@ -1186,6 +1031,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   late List<int> _order;
   late AnimationController _animController;
   Timer? _swapTimer;
+  final Map<int, VideoPlayerController> _controllers = {};
 
   @override
   void initState() {
@@ -1208,7 +1054,37 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
       }
     });
 
+    _initDeckVideoControllers();
     _startTimer();
+  }
+
+  void _initDeckVideoControllers() {
+    for (int i = 0; i < widget.mascots.length; i++) {
+      final primaryPath = widget.mascots[i]['video'] as String;
+      final fallbackPath = widget.mascots[i]['fallback'] as String?;
+
+      void loadPath(String path) {
+        final Uri videoUri = Uri.parse(path);
+        final controller = VideoPlayerController.networkUrl(videoUri);
+        controller.initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              _controllers[i] = controller;
+            });
+            controller.setLooping(true);
+            controller.setVolume(0.0);
+            controller.play();
+          }
+        }).catchError((err) {
+          debugPrint('Deck video init error ($path): $err');
+          if (fallbackPath != null && path != fallbackPath) {
+            loadPath(fallbackPath);
+          }
+        });
+      }
+
+      loadPath(primaryPath);
+    }
   }
 
   void _startTimer() {
@@ -1232,6 +1108,9 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   void dispose() {
     _swapTimer?.cancel();
     _animController.dispose();
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -1239,7 +1118,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   Widget build(BuildContext context) {
     return ClipRect(
       child: SizedBox(
-        height: 235,
+        height: 310,
         width: double.infinity,
         child: AnimatedBuilder(
           animation: _animController,
@@ -1267,43 +1146,26 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
   }
 
   Widget _buildCard(int slotIndex, int mascotIndex, double t) {
-    // Spatial positioning relative to center (Laterally Inverted: Stacking Rightwards)
-    // Slot 0 (Front): centered at (-10, 12)
-    // Slot 1 (Mid): (+6, -4)
-    // Slot 2 (Back): (+22, -20)
-    double xOffset = (1 - slotIndex) * 16.0 - 10.0;
-    double yOffset = (1 - slotIndex) * 16.0 - 4.0;
+    // Spatial positioning (Matching Image 2 Reference Stack)
+    // Slot 0 (Front): (-18, 16), scale 1.0, width 285, height 280
+    // Slot 1 (Mid): (+4, -6), scale 0.94
+    // Slot 2 (Back): (+24, -26), scale 0.88
+    double xOffset = (1 - slotIndex) * 20.0 - 18.0;
+    double yOffset = (1 - slotIndex) * 20.0 - 4.0;
     double scale = 1.0 - (slotIndex * 0.06);
 
-    // Slot-based color stack theme
-    final List<Color> slotBgColors = const [
-      Colors.white,
-      Color(0xFFDBE8DB),
-      Color(0xFFC5D8C5),
-    ];
-    final List<Color> slotBorderColors = const [
-      Color(0xFFD4E5D4),
-      Color(0xFFC0D8C0),
-      Color(0xFFAEC8AE),
-    ];
-
-    Color cardBg = slotBgColors[slotIndex.clamp(0, 2)];
-    Color cardBorder = slotBorderColors[slotIndex.clamp(0, 2)];
-
     if (slotIndex == 0 && _animController.isAnimating) {
-      yOffset += t * 380.0; // Drop front card straight down out of view
+      yOffset += t * 450.0; // Drop front card straight down out of view
     } else if (slotIndex > 0 && _animController.isAnimating) {
-      xOffset -= (16.0 * t); // Slide forward left to next slot
-      yOffset += (16.0 * t);
+      xOffset -= (20.0 * t); // Slide left-forward to next slot
+      yOffset += (20.0 * t);
       scale += (0.06 * t);
-      Color targetBg = slotBgColors[(slotIndex - 1).clamp(0, 2)];
-      Color targetBorder = slotBorderColors[(slotIndex - 1).clamp(0, 2)];
-      cardBg = Color.lerp(cardBg, targetBg, t.clamp(0.0, 1.0))!;
-      cardBorder = Color.lerp(cardBorder, targetBorder, t.clamp(0.0, 1.0))!;
     }
 
     final mascot = widget.mascots[mascotIndex];
     final isSelected = mascotIndex == widget.selectedIndex;
+    final controller = _controllers[mascotIndex];
+    final isReady = controller != null && controller.value.isInitialized;
 
     return Align(
       alignment: Alignment.center,
@@ -1312,81 +1174,119 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
           ..setEntry(3, 2, 0.001) // 3D Perspective
           ..translate(xOffset, yOffset)
           ..scale(scale)
-          ..rotateZ(-2 * math.pi / 180), // Laterally inverted perspective skew angle
+          ..rotateZ(-2.5 * math.pi / 180), // Perspective skew angle matching Image 2
         alignment: Alignment.center,
         child: GestureDetector(
           onTap: () => _onCardTap(mascotIndex),
           child: Container(
-            width: 275,
-            height: 180,
-            padding: const EdgeInsets.all(20),
+            width: 285,
+            height: 270,
             decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(26),
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: (isSelected && slotIndex == 0)
-                    ? const Color(0xFF10B981)
-                    : cardBorder,
-                width: (isSelected && slotIndex == 0) ? 2.5 : 1.5,
+                    ? const Color(0xFF3FFF80)
+                    : Colors.white30,
+                width: (isSelected && slotIndex == 0) ? 2.5 : 1.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(slotIndex == 0 ? 0.08 : 0.03),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
+                  color: Colors.black.withOpacity(slotIndex == 0 ? 0.35 : 0.18),
+                  blurRadius: 22,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      mascot['emoji'] as String,
-                      style: const TextStyle(fontSize: 40),
-                    ),
-                    if (isSelected && slotIndex == 0)
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF10B981),
-                          shape: BoxShape.circle,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Full-bleed live video preview inside the 3D card
+                  if (isReady)
+                    FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: controller.value.size.width > 0
+                            ? controller.value.size.width
+                            : 320,
+                        height: controller.value.size.height > 0
+                            ? controller.value.size.height
+                            : 270,
+                        child: VideoPlayer(controller),
+                      ),
+                    )
+                  else
+                    // Sleek gradient fallback poster with mascot emoji
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF0F3827),
+                            Color(0xFF1B4D36),
+                            Colors.black87,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        child: const Icon(Icons.check,
-                            color: Colors.white, size: 16),
                       ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      mascot['name'] as String,
-                      style: TextStyle(
-                        fontSize: 23,
-                        fontWeight: FontWeight.w900,
-                        color: slotIndex == 0
-                            ? const Color(0xFF0C2417)
-                            : const Color(0xFF263D2E),
+                      child: Center(
+                        child: Text(
+                          mascot['emoji'] as String,
+                          style: const TextStyle(fontSize: 64),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      mascot['subtitle'] as String,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: slotIndex == 0
-                            ? const Color(0xFF556D5E)
-                            : const Color(0xFF486151),
+
+                  // Dark bottom gradient overlay for typography (Matching Image 2)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black90,
+                            Colors.black45,
+                            Colors.transparent,
+                          ],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            mascot['name'] as String,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          if (slotIndex == 0) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              mascot['subtitle'] as String,
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1394,6 +1294,7 @@ class _MascotCardSwapDeckState extends State<MascotCardSwapDeck>
     );
   }
 }
+
 
 
 
